@@ -1,14 +1,24 @@
 import pygame
 import os
+from enum import Enum
 from gym.spaces import Discrete
 
 
-# YELLOW = AI
-class Game(object):
+class Action(Enum):
+    """
+    All actions in the game.
+    """
     NOOP = 0
     LEFT = 1
     RIGHT = 2
     FIRE = 3
+
+
+class Game(object):
+    """
+    Our shooter game wrapped in a class.
+    YELLOW is the AI player. RED is the enemy.
+    """
 
     def __init__(self):
         pygame.font.init()
@@ -31,7 +41,7 @@ class Game(object):
         self.HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
         self.WINNER_FONT = pygame.font.SysFont('comicsans', 100)
 
-        self.FPS = 20
+        self.FPS = 20  # Using a lower FPS because of the model
         self.VEL = 5
         self.BULLET_VEL = 7
         self.MAX_BULLETS = 3
@@ -41,17 +51,17 @@ class Game(object):
         self.RED_HIT = pygame.USEREVENT + 2
 
         self.YELLOW_SPACESHIP_IMAGE = pygame.image.load(
-            os.path.join('../../Assets', 'spaceship_yellow.png'))
+            os.path.join('../Assets', 'spaceship_yellow.png'))
         self.YELLOW_SPACESHIP = pygame.transform.scale(self.YELLOW_SPACESHIP_IMAGE,
                                                        (self.SPACESHIP_WIDTH, self.SPACESHIP_HEIGHT))
 
         self.RED_SPACESHIP_IMAGE = pygame.image.load(
-            os.path.join('../../Assets', 'spaceship_red.png'))
+            os.path.join('../Assets', 'spaceship_red.png'))
         self.RED_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
             self.RED_SPACESHIP_IMAGE, (self.SPACESHIP_WIDTH, self.SPACESHIP_HEIGHT)), 180)
 
         self.SPACE = pygame.transform.scale(pygame.image.load(
-            os.path.join('../../Assets', 'space.png')), (self.WIDTH, self.HEIGHT))
+            os.path.join('../Assets', 'space.png')), (self.WIDTH, self.HEIGHT))
 
         self.red = None
         self.yellow = None
@@ -70,14 +80,14 @@ class Game(object):
 
     def Actions(self):
         # NOOP, LEFT, RIGHT, FIRE
-        return Discrete(4)
+        return Discrete(len(Action))
 
     def ScreenShot(self):
         pixels_arr = pygame.surfarray.array3d(self.WIN)
         return pixels_arr
 
     def Done(self):
-        return self.run
+        return not self.run
 
     def Reward(self):
         return self.reward
@@ -94,6 +104,93 @@ class Game(object):
 
         self.clock = pygame.time.Clock()
         self.run = True
+
+    def Play(self, action_num):
+        if self.Done():
+            return
+
+        # Handle player health and reward
+        current_reward = 0
+        for event in pygame.event.get():
+
+            # Human inputs
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
+
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_LCTRL and len(self.yellow_bullets) < self.MAX_BULLETS:
+            #         bullet = pygame.Rect(
+            #             self.yellow.x + self.yellow.width // 2 - 2, self.yellow.y, 5, 10)
+            #         self.yellow_bullets.append(bullet)
+            #         # self.BULLET_FIRE_SOUND.play()
+            #
+            #     if event.key == pygame.K_RCTRL and len(self.red_bullets) < self.MAX_BULLETS:
+            #         bullet = pygame.Rect(
+            #             self.red.x + self.red.width // 2 - 2, self.red.y + self.red.height, 5, 10)
+            #         self.red_bullets.append(bullet)
+            #         # self.BULLET_FIRE_SOUND.play()
+
+            if event.type == self.RED_HIT:
+                self.red_health -= 1
+                current_reward += 10
+                # self.BULLET_HIT_SOUND.play()
+
+            if event.type == self.YELLOW_HIT:
+                self.yellow_health -= 1
+                current_reward -= 10
+                # self.BULLET_HIT_SOUND.play()
+
+        self.reward = current_reward
+
+        # Check if game is over
+        winner_text = ""
+        if self.red_health <= 0:
+            winner_text = "Yellow Wins!"
+            self.run = False
+
+        if self.yellow_health <= 0:
+            winner_text = "Red Wins!"
+            # self.run = False
+
+        if winner_text != "":
+            self.draw_winner(winner_text)
+            return
+
+        # Do action
+        keys_pressed = {
+            pygame.K_a: False,
+            pygame.K_d: False,
+            pygame.K_w: False,
+            pygame.K_s: False,
+            pygame.K_UP: False,
+            pygame.K_DOWN: False,
+            pygame.K_LEFT: False,
+            pygame.K_RIGHT: False,
+        }
+
+        action = Action(action_num)
+        if action == Action.FIRE:
+            bullet = pygame.Rect(
+                self.yellow.x + self.yellow.width // 2 - 2, self.yellow.y, 5, 10)
+            self.yellow_bullets.append(bullet)
+        elif action == Action.LEFT:
+            keys_pressed[pygame.K_a] = True
+        elif action == Action.RIGHT:
+            keys_pressed[pygame.K_d] = True
+
+        # Update display
+        self.yellow_handle_movement(keys_pressed, self.yellow)
+        self.red_handle_movement(keys_pressed, self.red)
+
+        self.handle_bullets(self.yellow_bullets, self.red_bullets, self.yellow, self.red)
+
+        self.draw_window(self.red, self.yellow, self.red_bullets, self.yellow_bullets,
+                         self.red_health, self.yellow_health)
+
+        self.clock.tick(self.FPS)
+
+    # ------------------------- Display update methods -------------------------
 
     def draw_window(self, red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
         self.WIN.blit(self.SPACE, (0, 0))
@@ -161,87 +258,6 @@ class Game(object):
         pygame.display.update()
         pygame.time.delay(5000)
 
-    def Play(self, action):
-        if self.run:
-            current_reward = 0
-            for event in pygame.event.get():
-                # if event.type == pygame.QUIT:
-                #     run = False
-                #     pygame.quit()
-                #
-                # if event.type == pygame.KEYDOWN:
-                #     if event.key == pygame.K_LCTRL and len(self.yellow_bullets) < self.MAX_BULLETS:
-                #         bullet = pygame.Rect(
-                #             self.yellow.x + self.yellow.width // 2 - 2, self.yellow.y, 5, 10)
-                #         self.yellow_bullets.append(bullet)
-                #         # self.BULLET_FIRE_SOUND.play()
-                #
-                #     if event.key == pygame.K_RCTRL and len(self.red_bullets) < self.MAX_BULLETS:
-                #         bullet = pygame.Rect(
-                #             self.red.x + self.red.width // 2 - 2, self.red.y + self.red.height, 5, 10)
-                #         self.red_bullets.append(bullet)
-                #         # self.BULLET_FIRE_SOUND.play()
-
-                # if event.key == pygame.K_0:
-                #     pixels_arr = pygame.farray.array3d(self.WIN)
-                #     print(pixels_arr)
-                #     print(pixels_arr.shape)
-
-                if event.type == self.RED_HIT:
-                    self.red_health -= 1
-                    current_reward -= 10
-                    # self.BULLET_HIT_SOUND.play()
-
-                if event.type == self.YELLOW_HIT:
-                    self.yellow_health -= 1
-                    current_reward += 10
-                    # self.BULLET_HIT_SOUND.play()
-
-            self.reward = current_reward
-
-            winner_text = ""
-            if self.red_health <= 0:
-                winner_text = "Yellow Wins!"
-                self.run = False
-
-            if self.yellow_health <= 0:
-                winner_text = "Red Wins!"
-                # self.run = False
-
-            if winner_text != "":
-                self.draw_winner(winner_text)
-                return
-
-            keys_pressed = {
-                pygame.K_a: False,
-                pygame.K_d: False,
-                pygame.K_w: False,
-                pygame.K_s: False,
-                pygame.K_UP: False,
-                pygame.K_DOWN: False,
-                pygame.K_LEFT: False,
-                pygame.K_RIGHT: False,
-            }
-
-            if action == Game.FIRE:
-                bullet = pygame.Rect(
-                    self.yellow.x + self.yellow.width // 2 - 2, self.yellow.y, 5, 10)
-                self.yellow_bullets.append(bullet)
-            elif action == Game.LEFT:
-                keys_pressed[pygame.K_a] = True
-            elif action == Game.RIGHT:
-                keys_pressed[pygame.K_d] = True
-
-            self.yellow_handle_movement(keys_pressed, self.yellow)
-            self.red_handle_movement(keys_pressed, self.red)
-
-            self.handle_bullets(self.yellow_bullets, self.red_bullets, self.yellow, self.red)
-
-            self.draw_window(self.red, self.yellow, self.red_bullets, self.yellow_bullets,
-                             self.red_health, self.yellow_health)
-
-            self.clock.tick(self.FPS)
-
 
 if __name__ == "__main__":
     game = Game()
@@ -249,9 +265,11 @@ if __name__ == "__main__":
         0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0
     ]
 
-    for action in action_list:
-        game.Play(action)
-        game.Play(action)
-        game.Play(action)
-        game.Play(action)
-        game.Play(action)
+    for action_num in action_list:
+        if game.Done():
+            break
+        game.Play(action_num)
+        game.Play(action_num)
+        game.Play(action_num)
+        game.Play(action_num)
+        game.Play(action_num)

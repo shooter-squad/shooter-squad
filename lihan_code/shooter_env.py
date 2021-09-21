@@ -3,6 +3,10 @@ from game import Game
 
 
 class ShooterEnv(Env):
+    """
+    The custom environment class for our shooter game.
+    """
+
     def __init__(self):
         self.game = Game()
         self.action_space = self.game.Actions()
