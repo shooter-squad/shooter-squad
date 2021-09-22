@@ -1,25 +1,12 @@
 import pygame
-import os
-from enum import Enum
-from gym.spaces import Discrete
+from constants import *
 
 
-class Action(Enum):
-    """
-    All actions in the game.
-    """
-    NOOP = 0
-    LEFT = 1
-    RIGHT = 2
-    FIRE = 3
-
-
-class Game(object):
+class GameScene(object):
     """
     Our shooter game wrapped in a class.
     YELLOW is the AI player. RED is the enemy.
     """
-
     def __init__(self):
         pygame.font.init()
         pygame.mixer.init()
@@ -29,11 +16,8 @@ class Game(object):
         pygame.display.set_caption("First Game!")
 
         self.WHITE = (255, 255, 255)
-        self.BLACK = (0, 0, 0)
         self.RED = (255, 0, 0)
         self.YELLOW = (255, 255, 0)
-
-        self.BORDER = pygame.Rect(self.WIDTH // 2 - 5, 0, 10, self.HEIGHT)
 
         # self.BULLET_HIT_SOUND = pygame.mixer.Sound('Assets/Grenade+1.mp3')
         # self.BULLET_FIRE_SOUND = pygame.mixer.Sound('Assets/Gun+Silencer.mp3')
@@ -78,9 +62,9 @@ class Game(object):
 
         self.Reset()
 
-    def Actions(self):
+    def ActionCount(self):
         # NOOP, LEFT, RIGHT, FIRE
-        return Discrete(len(Action))
+        return len(Action)
 
     def ScreenShot(self):
         pixels_arr = pygame.surfarray.array3d(self.WIN)
@@ -194,7 +178,6 @@ class Game(object):
 
     def draw_window(self, red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
         self.WIN.blit(self.SPACE, (0, 0))
-        # pygame.draw.rect(self.WIN, self.BLACK, self.BORDER)
 
         red_health_text = self.HEALTH_FONT.render(
             "Health: " + str(red_health), 1, self.WHITE)
@@ -260,7 +243,7 @@ class Game(object):
 
 
 if __name__ == "__main__":
-    game = Game()
+    game = GameScene()
     action_list = [
         0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0
     ]

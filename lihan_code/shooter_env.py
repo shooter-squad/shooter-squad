@@ -1,15 +1,15 @@
 from gym import Env
-from game import Game
+from gym.spaces import Discrete
+from game import GameScene
 
 
 class ShooterEnv(Env):
     """
     The custom environment class for our shooter game.
     """
-
     def __init__(self):
-        self.game = Game()
-        self.action_space = self.game.Actions()
+        self.game = GameScene()
+        self.action_space = Discrete(self.game.ActionCount())
         self.observation_space = self.game.ScreenShot()
         self.state = self.game.ScreenShot()
 
