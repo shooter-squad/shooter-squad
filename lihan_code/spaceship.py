@@ -48,17 +48,19 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.clamp_ip(self.screen_rect)
 
     def fire(self):
-        if len(self.bullets) < MAX_BULLETS:
-            self.bullets.add(
-                Bullet(
-                    x=self.rect.centerx,
-                    y=self.rect.y if self.up_direction else self.rect.bottom,
-                    color=self.color,
-                    vel_x=0,
-                    vel_y=-BULLET_VEL if self.up_direction else BULLET_VEL,
-                    screen_rect=self.screen_rect
-                )
+        if len(self.bullets) >= MAX_BULLETS:
+            return
+
+        self.bullets.add(
+            Bullet(
+                x=self.rect.centerx,
+                y=self.rect.y if self.up_direction else self.rect.bottom,
+                color=self.color,
+                vel_x=0,
+                vel_y=-BULLET_VEL if self.up_direction else BULLET_VEL,
+                screen_rect=self.screen_rect
             )
+        )
 
     def reset(self):
         self.rect.x = self.start_x
