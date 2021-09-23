@@ -40,19 +40,19 @@ SPACESHIP_HEIGHT = 40
 RED_START_HEALTH = 10
 YELLOW_START_HEALTH = 10
 
-RED_START_POSITION = (400, 100)
+RED_START_POSITION = (200, 300)
 YELLOW_START_POSITION = (400, 300)
 
 YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('../Assets', 'spaceship_yellow.png')
 RED_SPACESHIP_IMAGE_PATH = os.path.join('../Assets', 'spaceship_red.png')
 SPACE_IMAGE_PATH = os.path.join('../Assets', 'space.png')
-
+HIT_SOUND_PATH = os.path.join('../Assets', "Grenade+1.mp3")
+FIRE_SOUND_PATH = os.path.join('../Assets', "Gun+Silencer.mp3")
 
 # ------------------------- Colors -------------------------
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-YELLOW = (255, 255, 0)
-
+WHITE_COLOR = (255, 255, 255)
+RED_COLOR = (255, 0, 0)
+YELLOW_COLOR = (255, 255, 0)
 
 # ------------------------- Fonts -------------------------
 HEALTH_FONT = ('comicsans', 40)

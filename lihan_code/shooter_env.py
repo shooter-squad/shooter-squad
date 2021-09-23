@@ -1,27 +1,29 @@
 from gym import Env
 from gym.spaces import Discrete
-from game import GameScene
+
+from game_scene import GameScene
 
 
 class ShooterEnv(Env):
     """
     The custom environment class for our shooter game.
     """
+
     def __init__(self):
-        self.game = GameScene()
-        self.action_space = Discrete(self.game.ActionCount())
-        self.observation_space = self.game.ScreenShot()
-        self.state = self.game.ScreenShot()
+        self.game_scene = GameScene()
+        self.action_space = Discrete(self.game_scene.ActionCount())
+        self.observation_space = self.game_scene.ScreenShot()
+        self.state = self.game_scene.ScreenShot()
 
         self.reward = 0
-        self.done = self.game.Done()
+        self.done = self.game_scene.Done()
         self.info = {}
 
-    def step(self, action):
-        self.game.Play(action)
-        self.reward = self.game.Reward()
-        self.state = self.game.ScreenShot()
-        self.done = self.game.Done()
+    def step(self, action_num: int):
+        self.game_scene.Play(action_num)
+        self.reward = self.game_scene.Reward()
+        self.state = self.game_scene.ScreenShot()
+        self.done = self.game_scene.Done()
         self.info = {}
 
         return self.state, self.reward, self.done, self.info
@@ -30,7 +32,7 @@ class ShooterEnv(Env):
         pass
 
     def reset(self):
-        self.state = self.game.Reset()
+        self.state = self.game_scene.Reset()
         return self.state
 
 
