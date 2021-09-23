@@ -105,7 +105,7 @@ class GameScene(object):
             return
 
         self.reward = 0
-        self.update_window(player_action_num)
+        self.update(player_action_num)
         self.draw_window()
         self.clock.tick(FPS)
 
@@ -114,7 +114,7 @@ class GameScene(object):
 
     # ------------------------- Display update methods -------------------------
 
-    def update_window(self, player_action_num: int):
+    def update(self, player_action_num: int):
         # Player action from input
         player_action = Action(player_action_num)
         self.player.update(player_action, [self.enemy])
