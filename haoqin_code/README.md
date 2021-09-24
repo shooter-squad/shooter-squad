@@ -1,23 +1,11 @@
-# Deep-Q-Learning-Paper-To-Code
+# Game Environment
 
-Code for my course at Udemy: 
+The game is wrapped in ShooterEnv in `shooter_env.py`.
 
-https://www.udemy.com/course/deep-q-learning-from-paper-to-code/?referralCode=CBA45A3B737237E7BFD2
+## Parameters and Constants
 
-We analyze and implement the following papers:
+All parameters and constants are defined in `constants.py`. We only need to make changes there.
 
-Human Level Control Through Deep Reinforcement Learning
+## Enemy Behavior
 
-https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf
-
-Deep Reinforcement Learning with Double Q Learning:
-
-https://arxiv.org/abs/1509.06461
-
-Dueling Network Architectures for Deep Reinforcement Learning:
-
-https://arxiv.org/abs/1511.06581
-
-The course is still in review, and this readme is a work in progress. 
-
-Better docs to come!
+To write scripts for enemy, go to `update()` method of GameScene.
