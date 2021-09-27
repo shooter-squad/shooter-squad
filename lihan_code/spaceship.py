@@ -1,7 +1,5 @@
 from typing import List, Tuple
 
-import math
-
 import pygame
 
 from bullet import Bullet
@@ -33,47 +31,50 @@ class Spaceship(pygame.sprite.Sprite):
         self.action = Action.NOOP
 
     def update(self, action: Action, others: List[pygame.sprite.Sprite]):
-        if self.frame_to_update > 0: 
-            self.frame_to_update -=1
+        if self.frame_to_update > 0:
+            self.frame_to_update -= 1
             return
         self.frame_to_update = FRAME_TO_UPDATE
+
+        # Handle actions
         self.action = action
         if action == Action.NOOP:
             return
         if action == Action.FIRE:
             self.fire()
-        if action in  [Action.LEFT, Action.RIGHT, Action.UP, Action.DOWN]:
-                # vel = 1 if self.up_direction else -1
-                # if action == Action.LEFT:
-                #     vel *= -VEL
-                # elif action == Action.RIGHT:
-                #     vel *= VEL
-                # self.rect.x += vel
-            if action == Action.LEFT:
-                self.rect.x -= VEL
-            if action == Action.RIGHT:
-                self.rect.x += VEL
-            if action == Action.UP:
-                self.rect.y += VEL
-            if action == Action.DOWN:
-                self.rect.y -= VEL
-            # for other in others:
-            #     if pygame.sprite.collide_rect(other, self):
-            #         self.rect.x -= vel
-            #         break
+        if action in [Action.LEFT, Action.RIGHT, Action.UP, Action.DOWN]:
+            vel = 1 if self.up_direction else -1
+            if action == Action.LEFT or action == Action.UP:
+                vel *= -VEL
+            else:
+                vel *= VEL
+
+            if action == Action.LEFT or action == Action.RIGHT:
+                self.rect.x += vel
+                # Check collision
+                for other in others:
+                    if pygame.sprite.collide_rect(other, self):
+                        self.rect.x -= vel
+                        break
+            else:
+                self.rect.y += vel
+                # Check collision
+                for other in others:
+                    if pygame.sprite.collide_rect(other, self):
+                        self.rect.y -= vel
+                        break
         if action == Action.TURN_COUNTERCLOCKWISE or action == Action.TURN_CLOCKWISE:
             self.rot_center(THETA * (1 if action == Action.TURN_CLOCKWISE else -1))
+
         # Keep sprite on screen
         self.rect.clamp_ip(self.screen_rect)
 
-
-
-
     def rot_center(self, angle):
-        """rotate an image while keeping its center"""
-        self.direction+=angle
+        """
+        Rotate an image while keeping its center
+        """
+        self.direction += angle
         self.image = pygame.transform.rotate(self.surface, self.direction)
-        
 
     def fire(self):
         if len(self.bullets) >= MAX_BULLETS:

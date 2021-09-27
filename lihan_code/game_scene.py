@@ -27,12 +27,10 @@ class GameScene(object):
         self.debug_font = pygame.font.SysFont(DEBUG_FONT[0], DEBUG_FONT[1])
         self.winner_font = pygame.font.SysFont(WINNER_FONT[0], WINNER_FONT[1])
 
-        
-
         yellow_spaceship_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_IMAGE_PATH),
-            (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
-        red_spaceship_image = pygame.transform.scale(pygame.image.load(RED_SPACESHIP_IMAGE_PATH), 
-            (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
+                                                        (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
+        red_spaceship_image = pygame.transform.scale(pygame.image.load(RED_SPACESHIP_IMAGE_PATH),
+                                                     (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
 
         self.background = pygame.transform.scale(pygame.image.load(SPACE_IMAGE_PATH), (WIDTH, HEIGHT))
 
@@ -147,11 +145,11 @@ class GameScene(object):
         yellow_health_text = self.health_font.render(
             "YELLOW Health: " + str(self.player.health), True, YELLOW_COLOR)
         player_action_text = self.debug_font.render(
-            "RED Player Action: " + str(self.player.action), True, RED_COLOR)
+            "YELLOW Player Action: " + str(self.player.action), True, RED_COLOR)
 
         self.screen.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
         self.screen.blit(yellow_health_text, (10, 10))
-        self.screen.blit(player_action_text,(10,40))
+        self.screen.blit(player_action_text, (10, 40))
 
         # Draw player
         self.player_group.draw(self.screen)
@@ -178,7 +176,6 @@ if __name__ == "__main__":
     while True:
         if game.Done():
             break
-        game.Play(random.randint(0, len(Action) - 1))
-       
+        game.Play(2)
 
     game.Exit()

@@ -30,7 +30,7 @@ TITLE = "AI bot"
 
 WIDTH = 900
 HEIGHT = 500
-FPS = 20
+FPS = 60
 VEL = 5
 THETA = 30
 
