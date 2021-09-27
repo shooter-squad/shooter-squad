@@ -10,7 +10,11 @@ class Action(Enum):
     NOOP = 0
     LEFT = 1
     RIGHT = 2
-    FIRE = 3
+    UP = 3
+    DOWN = 4
+    FIRE = 5
+    TURN_COUNTERCLOCKWISE = 6
+    TURN_CLOCKWISE = 7
 
 
 class Reward(Enum):
@@ -28,9 +32,10 @@ WIDTH = 900
 HEIGHT = 500
 FPS = 20
 VEL = 5
+THETA = 30
 
 BULLET_WIDTH = 5
-BULLET_HEIGHT = 10
+BULLET_HEIGHT = 5
 BULLET_VEL = 7
 MAX_BULLETS = 3
 BULLET_DAMAGE = 1
@@ -39,9 +44,11 @@ SPACESHIP_WIDTH = 55
 SPACESHIP_HEIGHT = 40
 RED_START_HEALTH = 10
 YELLOW_START_HEALTH = 10
+FRAME_TO_UPDATE = 10
 
-RED_START_POSITION = (400, 100)
-YELLOW_START_POSITION = (400, 300)
+
+RED_START_POSITION = (500, 200)
+YELLOW_START_POSITION = (300, 200)
 
 YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('../Assets', 'spaceship_yellow.png')
 RED_SPACESHIP_IMAGE_PATH = os.path.join('../Assets', 'spaceship_red.png')
@@ -56,4 +63,5 @@ YELLOW_COLOR = (255, 255, 0)
 
 # ------------------------- Fonts -------------------------
 HEALTH_FONT = ('comicsans', 40)
+DEBUG_FONT = ('comicsans', 20)
 WINNER_FONT = ('comicsans', 100)
