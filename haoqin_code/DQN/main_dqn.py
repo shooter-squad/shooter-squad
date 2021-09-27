@@ -4,23 +4,24 @@ from dqn_agent import DQNAgent
 from utils import plot_learning_curve, make_env
 from gym import wrappers
 import time
-import 
+import sys
+# adding Folder_2 to the system path
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
+from Env import *
+
 
 if __name__ == '__main__':
     env_name = 'PongNoFrameskip-v4'
     env_name = 'CartPole-v1'
     env_name = 'Breakout-v0'
     env_name = 'moba_v0'
-    mode = 'shooter'
-    if mode == 'opengym':
-        env = make_env(env_name)
-    elif mode == 'shooter'
-        env = 
+    env_name = 'shooter'
+    env = make_env(env_name)
     #env = gym.make('CartPole-v1')
     best_score = -np.inf
     load_checkpoint = False
     # n_games = 400
-    n_games = 100000
+    n_games = 2000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),

@@ -3,6 +3,11 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
+import sys
+# adding Folder_2 to the system path
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
+from Env import *
+
 
 def plot_learning_curve(x, scores, epsilons, filename, lines=None):
     fig=plt.figure()
@@ -117,7 +122,11 @@ class StackFrames(gym.ObservationWrapper):
 
 def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
              no_ops=0, fire_first=False):
-    env = gym.make(env_name)
+    env = None
+    if env_name == 'shooter':
+        env = ShooterEnv()
+    else:
+        env = gym.make(env_name)
     env = RepeatActionAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
     env = PreprocessFrame(shape, env)
     env = StackFrames(env, repeat)
