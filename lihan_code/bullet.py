@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import math
 import pygame
 from constants import *
 
@@ -9,15 +10,17 @@ class Bullet(pygame.sprite.Sprite):
     The bullet class.
     """
 
-    def __init__(self, x: int, y: int, color: Tuple[int, int, int], vel_x: int, vel_y: int, screen_rect: pygame.Rect):
+    def __init__(self, x: int, y: int, color: Tuple[int, int, int], direction, screen_rect: pygame.Rect):
         super().__init__()
         self.image = pygame.Surface((BULLET_WIDTH, BULLET_HEIGHT)).convert()
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.vel_x = vel_x
-        self.vel_y = vel_y
+
+        self.direction = direction
+        self.vel_x = math.sin(self.direction/180 * math.pi) * BULLET_VEL
+        self.vel_y = math.cos(self.direction/180 * math.pi) * BULLET_VEL
         self.screen_rect = screen_rect
 
     def update(self):
