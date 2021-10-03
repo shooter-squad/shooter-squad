@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import gym
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/Users/riteshkumar/Documents/GitHub/shooter-squad/rupesh_code')
+sys.path.insert(0, r'/Users/riteshkumar/Documents/GitHub/new_Shooter/rupesh_code')
 from Env import *
 
 

@@ -5,6 +5,10 @@ import pygame
 from .constants import *
 from .spaceship import Spaceship
 
+import os
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+import pygame.transform
+import pygame.display
 
 class GameScene(object):
     """
@@ -17,6 +21,8 @@ class GameScene(object):
         pygame.font.init()
         pygame.mixer.init()
 
+
+        pygame.display.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
 

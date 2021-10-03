@@ -43,6 +43,14 @@ YELLOW_START_HEALTH = 10
 RED_START_POSITION = (275, 80)
 YELLOW_START_POSITION = (275, 400)
 
+# if running the game_scene.py
+# YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_yellow.png')
+# RED_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_red.png')
+# SPACE_IMAGE_PATH = os.path.join('../../Assets', 'space.png')
+# HIT_SOUND_PATH = os.path.join('../../Assets', "Grenade+1.mp3")
+# FIRE_SOUND_PATH = os.path.join('../../Assets', "Gun+Silencer.mp3")
+
+# if running the main code
 YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('./Assets', 'spaceship_yellow.png')
 RED_SPACESHIP_IMAGE_PATH = os.path.join('./Assets', 'spaceship_red.png')
 SPACE_IMAGE_PATH = os.path.join('./Assets', 'space.png')
