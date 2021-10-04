@@ -1,10 +1,12 @@
 import random
+import os
 
 import pygame
 
 from constants import *
 from spaceship import Spaceship
 
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 class GameScene(object):
     """
@@ -26,17 +28,16 @@ class GameScene(object):
         self.health_font = pygame.font.SysFont(HEALTH_FONT[0], HEALTH_FONT[1])
         self.winner_font = pygame.font.SysFont(WINNER_FONT[0], WINNER_FONT[1])
 
-        # These two images will not be used. Keep for future usage.
-        yellow_spaceship_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_IMAGE_PATH),
-                                                        (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
-        red_spaceship_image = pygame.transform.rotate(
-            pygame.transform.scale(pygame.image.load(RED_SPACESHIP_IMAGE_PATH), (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)),
-            180)
+        # These two images will not be used. Keep them for future usage.
+        # yellow_spaceship_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_IMAGE_PATH),
+        #                                                 (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
+        # red_spaceship_image = pygame.transform.rotate(
+        #     pygame.transform.scale(pygame.image.load(RED_SPACESHIP_IMAGE_PATH), (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)),
+        #     180)
 
         self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
 
         self.player = Spaceship(
-            image=yellow_spaceship_image,
             screen_rect=self.screen.get_rect(),
             start_health=YELLOW_START_HEALTH,
             start_x=YELLOW_START_POSITION[0],
@@ -48,7 +49,6 @@ class GameScene(object):
         self.player_group.add(self.player)
 
         self.enemy = Spaceship(
-            image=red_spaceship_image,
             screen_rect=self.screen.get_rect(),
             start_health=RED_START_HEALTH,
             start_x=RED_START_POSITION[0],
