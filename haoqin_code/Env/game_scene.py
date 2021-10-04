@@ -1,10 +1,12 @@
 import random
+import os
 
 import pygame
 
 from .constants import *
 from .spaceship import Spaceship
 
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 class GameScene(object):
     """
@@ -32,7 +34,10 @@ class GameScene(object):
             pygame.transform.scale(pygame.image.load(RED_SPACESHIP_IMAGE_PATH), (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)),
             180)
 
-        self.background = pygame.transform.scale(pygame.image.load(SPACE_IMAGE_PATH), (WIDTH, HEIGHT))
+        if PURE_COLOR_DISPLAY:
+            self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
+        else:
+            self.background = pygame.transform.scale(pygame.image.load(SPACE_IMAGE_PATH), (WIDTH, HEIGHT))
 
         self.player = Spaceship(
             image=yellow_spaceship_image,
@@ -88,9 +93,20 @@ class GameScene(object):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if player_action_num == -1:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        player_action_num = 1
+                    if event.key == pygame.K_RIGHT:
+                        player_action_num = 2
+                    if event.key == pygame.K_SPACE:
+                        player_action_num = 3
 
         if not self.run:
             return
+
+        if player_action_num == -1:
+            player_action_num = 0
 
         # Check if game is over
         winner_text = ""
@@ -126,10 +142,11 @@ class GameScene(object):
             if self.enemy.rect.left <= 50:
                 self.enemy_direction = 'left'
         if self.enemy_direction == 'left':
-            if self.enemy.rect.right >= 850:
+            if self.enemy.rect.right >= WIDTH - 50:
                 self.enemy_direction = 'right'
         enemy_action = Action.LEFT if self.enemy_direction == 'left' else Action.RIGHT
-        enemy_action = enemy_action if random.random() <0.7 else Action.FIRE
+        enemy_action = enemy_action if random.random() < 0.7 else Action.FIRE
+
         self.enemy.update(enemy_action, [self.player])
         self.enemy.bullets.update()
 
@@ -143,6 +160,9 @@ class GameScene(object):
         hit_list = pygame.sprite.spritecollide(self.enemy, self.player.bullets, True)
         self.enemy.health -= BULLET_DAMAGE * len(hit_list)
         self.reward += Reward.BULLET_HIT_ENEMY.value * len(hit_list)
+
+        if NEGATIVE_REWARD_ENABLED:
+            self.reward -= NEGATIVE_REWARD
 
     def draw_window(self):
         self.screen.blit(self.background, (0, 0))
@@ -177,13 +197,16 @@ if __name__ == "__main__":
 
     action_list = [1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 2, 2, 2, 3, 2, 2, 1, 2, 1, 2, 2, 3, 2, 1, 3, 1, 3]
 
-    for action in action_list:
-        if game.Done():
-            break
-        game.Play(action)
-        game.Play(action)
-        game.Play(action)
-        game.Play(action)
-        game.Play(action)
+    # for action in action_list:
+    #     if game.Done():
+    #         break
+    #     game.Play(action)
+    #     game.Play(action)
+    #     game.Play(action)
+    #     game.Play(action)
+    #     game.Play(action)
+
+    while not game.Done():
+        game.Play(-1)
 
     game.Exit()

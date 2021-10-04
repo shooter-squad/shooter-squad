@@ -1,8 +1,10 @@
+import numpy as np
 from gym import Env
 from gym.spaces import Discrete, Box
-import numpy as np
+
+from .constants import *
 from .game_scene import GameScene
-from .constants import *    
+
 
 class ShooterEnv(Env):
     """
@@ -14,11 +16,10 @@ class ShooterEnv(Env):
         self.action_space = Discrete(self.game_scene.ActionCount())
         # self.observation_space = self.game_scene.ScreenShot()
         self.observation_shape = (WIDTH, HEIGHT, 3)
-        self.observation_space = Box(low = np.zeros(self.observation_shape), 
-                                            high = np.ones(self.observation_shape),
-                                            dtype = np.float16)
+        self.observation_space = Box(low=np.zeros(self.observation_shape),
+                                     high=np.ones(self.observation_shape),
+                                     dtype=np.float16)
         self.state = self.game_scene.ScreenShot()
-        
 
         self.reward = 0
         self.done = self.game_scene.Done()

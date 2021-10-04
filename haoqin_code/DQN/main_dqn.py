@@ -1,43 +1,22 @@
-from haoqin_code.shooter_env import ShooterEnv
-import sys
-sys.path.append("..") # Adds higher directory to python modules path.
-
 import gym
 import numpy as np
 from dqn_agent import DQNAgent
 from utils import plot_learning_curve, make_env
 from gym import wrappers
 import time
-<<<<<<< Updated upstream
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
+sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
 from Env import *
 
-=======
-from .. import shooter_env
->>>>>>> Stashed changes
 
 if __name__ == '__main__':
-    env_name = 'PongNoFrameskip-v4'
-    env_name = 'CartPole-v1'
-    env_name = 'Breakout-v0'
-    env_name = 'moba_v0'
-<<<<<<< Updated upstream
     env_name = 'shooter'
     env = make_env(env_name)
-=======
-    mode = 'shooter'
-    if mode == 'opengym':
-        env = make_env(env_name)
-    elif mode == 'shooter':
-        env = ShooterEnv()
->>>>>>> Stashed changes
-    #env = gym.make('CartPole-v1')
+
     best_score = -np.inf
     load_checkpoint = False
-    # n_games = 400
-    n_games = 2000
+    n_games = 3000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -62,6 +41,8 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
+    output_file = open("stats.txt", "w")
+
     for i in range(n_games):
         done = False
         observation = env.reset()
@@ -83,14 +64,17 @@ if __name__ == '__main__':
             observation = observation_
             n_steps += 1
             time_curr = time.time()
-            # print(time_curr - time_prev)
+
         scores.append(score)
         steps_array.append(n_steps)
 
         avg_score = np.mean(scores[-100:])
-        print('episode: ', i,'score: ', score,
-             ' average score %.1f' % avg_score, 'best score %.2f' % best_score,
-            'epsilon %.2f' % agent.epsilon, 'steps', n_steps)
+
+        output_file.write('episode: {0}, score: {1}, average score: {2:.1f}, best score: {3:.2f}, epsilon: {4:.2f}, steps: {5}\n'.format(i, score, avg_score, best_score,agent.epsilon, n_steps))
+
+        print('episode: ', i,', score: ', score,
+                ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
+                ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
 
         if avg_score > best_score:
             # if not load_checkpoint:
@@ -102,5 +86,5 @@ if __name__ == '__main__':
         if i % 50 == 4:
             agent.save_models()
 
-    x = [i+1 for i in range(len(scores))]
+    x = [i + 1 for i in range(len(scores))]
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
