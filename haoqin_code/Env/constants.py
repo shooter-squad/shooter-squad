@@ -20,18 +20,22 @@ class Reward(Enum):
     BULLET_HIT_ENEMY = 10
     BULLET_HIT_PLAYER = -10
 
+PURE_COLOR_DISPLAY = False
+NEGATIVE_REWARD_ENABLED = True
+NEGATIVE_REWARD = 0.005
+
 
 # ------------------------- Values -------------------------
 TITLE = "AI bot"
 
-WIDTH = 900
+WIDTH = 600
 HEIGHT = 500
-FPS = 150
+FPS = 200
 VEL = 5
 
 BULLET_WIDTH = 5
-BULLET_HEIGHT = 10
-BULLET_VEL = 7
+BULLET_HEIGHT = 7
+BULLET_VEL = 10
 MAX_BULLETS = 3
 BULLET_DAMAGE = 1
 
@@ -40,8 +44,8 @@ SPACESHIP_HEIGHT = 40
 RED_START_HEALTH = 10
 YELLOW_START_HEALTH = 10
 
-RED_START_POSITION = (400, 100)
-YELLOW_START_POSITION = (400, 300)
+RED_START_POSITION = (275, 80)
+YELLOW_START_POSITION = (275, 400)
 
 YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_yellow.png')
 RED_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_red.png')
