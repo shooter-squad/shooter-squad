@@ -6,7 +6,7 @@ from gym import wrappers
 import time
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/home/elvinzhu/shooter-squad/haoyun_code')
+sys.path.insert(0, r'/home/elvinzhu/github/shooter-squad/haoyun_code')
 from Env import *
 
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     best_score = -np.inf
     load_checkpoint = False
     # n_games = 400
-    n_games = 2000
+    n_games = 4000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     fname = agent.algo + '_' + agent.env_name + '_lr' + str(agent.lr) +'_' \
             + str(n_games) + 'games'
-    figure_file = 'plots/' + fname + '.png'
+    
     # if you want to record video of your agent playing, do a mkdir tmp && mkdir tmp/dqn-video
     # and uncomment the following 2 lines.
     #env = wrappers.Monitor(env, "tmp/dqn-video",
@@ -43,8 +43,7 @@ if __name__ == '__main__':
     n_steps = 0
     scores, eps_history, steps_array = [], [], []
 
-    time_prev = 0
-    time_curr = 0
+    time_prev = time.time()
 
     for i in range(n_games):
         done = False
@@ -56,7 +55,6 @@ if __name__ == '__main__':
             action = agent.choose_action(observation)  
             observation_, reward, done, info = env.step(action)
             # print(observation.shape)
-            time_prev = time.time()
             score += reward
 
             if not load_checkpoint: # NOTE: obseration: [32, 4, 84, 84]; actions: [32]; obseration_: [32, 4, 84, 84]; dones: [32]; rewards:[32]
@@ -66,15 +64,15 @@ if __name__ == '__main__':
                 agent.learn()
             observation = observation_
             n_steps += 1
-            time_curr = time.time()
-            # print(time_curr - time_prev)
+            
         scores.append(score)
         steps_array.append(n_steps)
 
         avg_score = np.mean(scores[-100:])
         print('episode: ', i,'score: ', score,
              ' average score %.1f' % avg_score, 'best score %.2f' % best_score,
-            'epsilon %.2f' % agent.epsilon, 'steps', n_steps)
+            'epsilon %.2f' % agent.epsilon, 'steps', n_steps, 'time', time.time()-time_prev)
+        time_prev = time.time()
 
         if avg_score > best_score:
             # if not load_checkpoint:
@@ -83,8 +81,10 @@ if __name__ == '__main__':
 
         eps_history.append(agent.epsilon)
 
-        if i % 50 == 4:
+        if i % 100 == 10:
             agent.save_models()
+            figure_file = 'plots/' + fname +'_'+str(i)+'_.png'
+            plot_learning_curve(steps_array, scores, eps_history, figure_file)
 
-    x = [i+1 for i in range(len(scores))]
+    figure_file = 'plots/' + fname + '_final.png'
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
