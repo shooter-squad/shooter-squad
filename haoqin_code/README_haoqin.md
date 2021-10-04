@@ -17,4 +17,12 @@ Steps to train DQN agent in Haoqin's folder:
 
 5. Under no circumstance should a user modify or run the content inside other users' folder. Just copy out what you want to your own folder and modify/run here.
 
+_________________________________________________UPDATED instruction on 10/4/2021__________________________________________________
+1. in xxx_code/DQN/utils.py, line 55, change
+        for i in range(repeat):
+   into:
+        for i in range(1):
+   The reason is because in the original implementation, an action is repeated for four times to avoid frame skipping. However, our envrionment does not have frameskipping, so we do not want to repeat an action four times.
+   If we do repeat the actions, we clearly see that the agent fires bullets consequtively (three times) even though it means to fire it only once.
+
 

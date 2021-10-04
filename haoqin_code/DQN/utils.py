@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import gym
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
+sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
 from Env import *
 
 
@@ -52,7 +52,7 @@ class RepeatActionAndMaxFrame(gym.Wrapper):
     def step(self, action):
         t_reward = 0.0
         done = False
-        for i in range(self.repeat):
+        for i in range(1):
             obs, reward, done, info = self.env.step(action)
             if self.clip_reward:
                 reward = np.clip(np.array([reward]), -1, 1)[0]

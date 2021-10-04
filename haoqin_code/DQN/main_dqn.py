@@ -6,7 +6,7 @@ from gym import wrappers
 import time
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
+sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
 from Env import *
 
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 3000
+    n_games = 4000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     time_curr = 0
 
     output_file = open("stats.txt", "w")
-
+    accuracy_file = open('accuracy_image_neg', 'w')
     for i in range(n_games):
         done = False
         observation = env.reset()
@@ -50,7 +50,18 @@ if __name__ == '__main__':
         score = 0
         while not done:
             # // NOTE: whenever the agent makes a move, he enters a new state. it store the observation, action, reward, obseravation_, done in his memory for REPLAY, which has size of 40000.
-            action = agent.choose_action(observation)  
+            action = agent.choose_action(observation) 
+            # print('in one iteration')
+            
+            # fire_file = open('fire.txt', 'a')
+            # if action == 3:
+            #     fire_file.write(str(action))
+            #     print('fire')
+            # else:
+            #     fire_file.write(str('_'))
+            #     print('None')
+            # fire_file.close()
+            
             observation_, reward, done, info = env.step(action)
             # print(observation.shape)
             time_prev = time.time()
@@ -75,7 +86,9 @@ if __name__ == '__main__':
         print('episode: ', i,', score: ', score,
                 ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
                 ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
-
+        accuracy_file.write('episode: ' + str(i) + ' score: ' + str(score) +
+                ' average score: ' + str(avg_score) + ' best score: ' + str(best_score) +
+                ' epsilon: ' + str(agent.epsilon) + ' steps: ' + str(n_steps) + '\n')
         if avg_score > best_score:
             # if not load_checkpoint:
             #     agent.save_models()
@@ -83,8 +96,8 @@ if __name__ == '__main__':
 
         eps_history.append(agent.epsilon)
 
-        if i % 50 == 4:
+        if i % 50 == 49:
             agent.save_models()
-
+    accuracy_file.close()
     x = [i + 1 for i in range(len(scores))]
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
