@@ -11,17 +11,12 @@ from Env import *
 
 
 if __name__ == '__main__':
-    env_name = 'PongNoFrameskip-v4'
-    env_name = 'CartPole-v1'
-    env_name = 'Breakout-v0'
-    env_name = 'moba_v0'
     env_name = 'shooter'
     env = make_env(env_name)
-    #env = gym.make('CartPole-v1')
+
     best_score = -np.inf
     load_checkpoint = False
-    # n_games = 400
-    n_games = 2000
+    n_games = 4000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -67,14 +62,16 @@ if __name__ == '__main__':
             observation = observation_
             n_steps += 1
             time_curr = time.time()
-            # print(time_curr - time_prev)
+
         scores.append(score)
         steps_array.append(n_steps)
 
         avg_score = np.mean(scores[-100:])
-        print('episode: ', i,'score: ', score,
-             ' average score %.1f' % avg_score, 'best score %.2f' % best_score,
-            'epsilon %.2f' % agent.epsilon, 'steps', n_steps)
+
+        with open("stats.txt", "a") as f:
+            f.write('episode: ', i,', score: ', score,
+                    ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
+                    ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
 
         if avg_score > best_score:
             # if not load_checkpoint:
@@ -86,5 +83,5 @@ if __name__ == '__main__':
         if i % 50 == 4:
             agent.save_models()
 
-    x = [i+1 for i in range(len(scores))]
+    x = [i + 1 for i in range(len(scores))]
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
