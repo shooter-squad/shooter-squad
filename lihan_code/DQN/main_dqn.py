@@ -6,7 +6,7 @@ from gym import wrappers
 import time
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
+sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
 from Env import *
 
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 4000
+    n_games = 3000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -40,6 +40,8 @@ if __name__ == '__main__':
 
     time_prev = 0
     time_curr = 0
+
+    output_file = open("stats.txt", "w")
 
     for i in range(n_games):
         done = False
@@ -68,10 +70,11 @@ if __name__ == '__main__':
 
         avg_score = np.mean(scores[-100:])
 
-        with open("stats.txt", "a") as f:
-            f.write('episode: ', i,', score: ', score,
-                    ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
-                    ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
+        output_file.write('episode: {0}, score: {1}, average score: {2:.1f}, best score: {3:.2f}, epsilon: {4:.2f}, steps: {5}\n'.format(i, score, avg_score, best_score,agent.epsilon, n_steps))
+
+        print('episode: ', i,', score: ', score,
+                ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
+                ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
 
         if avg_score > best_score:
             # if not load_checkpoint:

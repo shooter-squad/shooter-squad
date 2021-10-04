@@ -2,8 +2,8 @@ from typing import List, Tuple
 
 import pygame
 
-from bullet import Bullet
-from constants import *
+from .bullet import Bullet
+from .constants import *
 
 
 class Spaceship(pygame.sprite.Sprite):
@@ -11,11 +11,16 @@ class Spaceship(pygame.sprite.Sprite):
     The spaceship class for both player and enemy.
     """
 
-    def __init__(self, screen_rect: pygame.Rect, start_health: int, start_x: int, start_y: int,
+    def __init__(self, image: pygame.Surface, screen_rect: pygame.Rect, start_health: int, start_x: int, start_y: int,
                  color: Tuple[int, int, int], up_direction: bool):
         super().__init__()
-        self.image = pygame.Surface((SPACESHIP_WIDTH, SPACESHIP_HEIGHT)).convert()
-        self.image.fill(color)
+
+        if PURE_COLOR_DISPLAY:
+            self.image = pygame.Surface((SPACESHIP_WIDTH, SPACESHIP_HEIGHT)).convert()
+            self.image.fill(color)
+        else:
+            self.image = image
+        
         self.rect = self.image.get_rect()
         self.screen_rect = screen_rect
         self.health = start_health

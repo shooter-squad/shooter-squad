@@ -20,13 +20,17 @@ class Reward(Enum):
     BULLET_HIT_ENEMY = 10
     BULLET_HIT_PLAYER = -10
 
+PURE_COLOR_DISPLAY = True
+NEGATIVE_REWARD_ENABLED = True
+NEGATIVE_REWARD = 0.005
+
 
 # ------------------------- Values -------------------------
 TITLE = "AI bot"
 
 WIDTH = 600
 HEIGHT = 500
-FPS = 20
+FPS = 150
 VEL = 5
 
 BULLET_WIDTH = 5
