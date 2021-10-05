@@ -15,8 +15,8 @@ if __name__ == '__main__':
     env = make_env(env_name)
 
     best_score = -np.inf
-    load_checkpoint = False
-    n_games = 3000
+    load_checkpoint = True
+    n_games = 1000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),

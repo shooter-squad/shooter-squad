@@ -52,7 +52,7 @@ class RepeatActionAndMaxFrame(gym.Wrapper):
     def step(self, action):
         t_reward = 0.0
         done = False
-        for i in range(self.repeat):
+        for i in range(1):
             obs, reward, done, info = self.env.step(action)
             if self.clip_reward:
                 reward = np.clip(np.array([reward]), -1, 1)[0]
