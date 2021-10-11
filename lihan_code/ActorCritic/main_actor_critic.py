@@ -49,8 +49,6 @@ if __name__ == '__main__':
         scores.append(score)
 
         avg_score = np.mean(scores[-100:])
-        print('episode ', i, 'score %.1f' % score,
-              'average score %.1f' % avg_score)
 
         if avg_score > best_score:
             best_score = avg_score
@@ -58,6 +56,8 @@ if __name__ == '__main__':
         output_file.write(
             'episode: {0}, score: {1}, average score: {2:.1f}, best score: {3:.2f}, steps: {4}\n'.format(
                 i, score, avg_score, best_score, n_steps))
+        print('episode:', i, ', score:', score, ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
+              ', steps:', n_steps)
 
     x = [i + 1 for i in range(n_games)]
     plot_learning_curve(x, scores, figure_file)
