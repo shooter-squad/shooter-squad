@@ -1,15 +1,13 @@
-import copy
-import glob
 import os
+import sys
 import time
 from collections import deque
 
-import gym
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
+
+# Adds actor_critic to the system path.
+sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code/actor_critic')
 
 from a2c_ppo_acktr import algo, utils
 from a2c_ppo_acktr.algo import gail
@@ -18,6 +16,7 @@ from a2c_ppo_acktr.envs import make_vec_envs
 from a2c_ppo_acktr.model import Policy
 from a2c_ppo_acktr.storage import RolloutStorage
 from evaluation import evaluate
+from utils import plot_learning_curve, make_env
 
 
 def main():
@@ -38,12 +37,12 @@ def main():
     torch.set_num_threads(1)
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
-    envs = make_vec_envs(args.env_name, args.seed, args.num_processes,
-                         args.gamma, args.log_dir, device, False)
+    env_name = 'shooter'
+    env = make_env(env_name)
 
     actor_critic = Policy(
-        envs.observation_space.shape,
-        envs.action_space,
+        env.observation_space.shape,
+        env.action_space,
         base_kwargs={'recurrent': args.recurrent_policy})
     actor_critic.to(device)
 
@@ -72,14 +71,14 @@ def main():
             actor_critic, args.value_loss_coef, args.entropy_coef, acktr=True)
 
     if args.gail:
-        assert len(envs.observation_space.shape) == 1
+        assert len(env.observation_space.shape) == 1
         discr = gail.Discriminator(
-            envs.observation_space.shape[0] + envs.action_space.shape[0], 100,
+            env.observation_space.shape[0] + env.action_space.shape[0], 100,
             device)
         file_name = os.path.join(
             args.gail_experts_dir, "trajs_{}.pt".format(
                 args.env_name.split('-')[0].lower()))
-        
+
         expert_dataset = gail.ExpertDataset(
             file_name, num_trajectories=4, subsample_frequency=20)
         drop_last = len(expert_dataset) > args.gail_batch_size
@@ -90,11 +89,11 @@ def main():
             drop_last=drop_last)
 
     rollouts = RolloutStorage(args.num_steps, args.num_processes,
-                              envs.observation_space.shape, envs.action_space,
+                              env.observation_space.shape, env.action_space,
                               actor_critic.recurrent_hidden_state_size)
 
-    obs = envs.reset()
-    rollouts.obs[0].copy_(obs)
+    obs = torch.from_numpy(env.reset())
+    rollouts.obs.copy_(obs)
     rollouts.to(device)
 
     episode_rewards = deque(maxlen=10)
@@ -118,20 +117,26 @@ def main():
                     rollouts.masks[step])
 
             # Obser reward and next obs
-            obs, reward, done, infos = envs.step(action)
+            obs, reward, done, info = env.step(action.item())
 
-            for info in infos:
-                if 'episode' in info.keys():
-                    episode_rewards.append(info['episode']['r'])
+            # for info in info:
+            #     if 'episode' in info.keys():
+            #         episode_rewards.append(info['episode']['r'])
 
             # If done then clean the history of observations.
             masks = torch.FloatTensor(
-                [[0.0] if done_ else [1.0] for done_ in done])
+                [[0.0] if done else [1.0]])
             bad_masks = torch.FloatTensor(
-                [[0.0] if 'bad_transition' in info.keys() else [1.0]
-                 for info in infos])
+                [[0.0] if 'bad_transition' == info else [1.0]])
             rollouts.insert(obs, recurrent_hidden_states, action,
                             action_log_prob, value, reward, masks, bad_masks)
+
+            # print('episode: ', step, ', score: ', score,
+            #       ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
+            #       ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
+
+            if done:
+                env.reset()
 
         with torch.no_grad():
             next_value = actor_critic.get_value(
@@ -140,14 +145,14 @@ def main():
 
         if args.gail:
             if j >= 10:
-                envs.venv.eval()
+                env.venv.eval()
 
             gail_epoch = args.gail_epoch
             if j < 10:
                 gail_epoch = 100  # Warm up
             for _ in range(gail_epoch):
                 discr.update(gail_train_loader, rollouts,
-                             utils.get_vec_normalize(envs)._obfilt)
+                             utils.get_vec_normalize(env)._obfilt)
 
             for step in range(args.num_steps):
                 rollouts.rewards[step] = discr.predict_reward(
@@ -163,7 +168,7 @@ def main():
 
         # save for every interval-th episode or for the last epoch
         if (j % args.save_interval == 0
-                or j == num_updates - 1) and args.save_dir != "":
+            or j == num_updates - 1) and args.save_dir != "":
             save_path = os.path.join(args.save_dir, args.algo)
             try:
                 os.makedirs(save_path)
@@ -172,26 +177,29 @@ def main():
 
             torch.save([
                 actor_critic,
-                getattr(utils.get_vec_normalize(envs), 'obs_rms', None)
+                getattr(utils.get_vec_normalize(env), 'obs_rms', None)
             ], os.path.join(save_path, args.env_name + ".pt"))
 
-        if j % args.log_interval == 0 and len(episode_rewards) > 1:
+        # if j % args.log_interval == 0 and len(episode_rewards) > 1:
+        if j % args.log_interval == 0:
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
             end = time.time()
             print(
                 "Updates {}, num timesteps {}, FPS {} \n Last {} training episodes: mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}\n"
-                .format(j, total_num_steps,
-                        int(total_num_steps / (end - start)),
-                        len(episode_rewards), np.mean(episode_rewards),
-                        np.median(episode_rewards), np.min(episode_rewards),
-                        np.max(episode_rewards), dist_entropy, value_loss,
-                        action_loss))
+                    .format(j, total_num_steps,
+                            int(total_num_steps / (end - start)),
+                            len(episode_rewards), np.mean(episode_rewards),
+                            np.median(episode_rewards), np.min(episode_rewards),
+                            np.max(episode_rewards), dist_entropy, value_loss,
+                            action_loss))
 
         if (args.eval_interval is not None and len(episode_rewards) > 1
                 and j % args.eval_interval == 0):
-            obs_rms = utils.get_vec_normalize(envs).obs_rms
+            obs_rms = utils.get_vec_normalize(env).obs_rms
             evaluate(actor_critic, obs_rms, args.env_name, args.seed,
                      args.num_processes, eval_log_dir, device)
+
+        print('episode:', j)
 
 
 if __name__ == "__main__":
