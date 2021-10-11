@@ -10,8 +10,10 @@ class ActorCriticNetwork(nn.Module):
     The network shared by both actor and critic. The only difference is the output layer.
     """
 
-    def __init__(self, lr, input_dims, n_actions, fc1_dims=256, fc2_dims=256):
+    def __init__(self, lr, input_dims, n_actions, chkpt_dir, fc1_dims=256, fc2_dims=256):
         super(ActorCriticNetwork, self).__init__()
+
+        self.checkpoint_dir = chkpt_dir
 
         self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
@@ -49,6 +51,14 @@ class ActorCriticNetwork(nn.Module):
 
         return (pi, v)
 
+    def save_checkpoint(self):
+        print('... saving checkpoint ...')
+        T.save(self.state_dict(), self.checkpoint_file)
+
+    def load_checkpoint(self):
+        print('... loading checkpoint ...')
+        self.load_state_dict(T.load(self.checkpoint_file))
+
 
 class ActorCriticAgent:
     """
@@ -56,13 +66,12 @@ class ActorCriticAgent:
     """
 
     def __init__(self, lr, input_dims, fc1_dims, fc2_dims, n_actions,
-                 gamma=0.99):
+                 gamma=0.99, chkpt_dir='models/'):
         self.gamma = gamma
         self.lr = lr
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
-        self.actor_critic = ActorCriticNetwork(lr, input_dims, n_actions,
-                                               fc1_dims, fc2_dims)
+        self.actor_critic = ActorCriticNetwork(lr, input_dims, n_actions, chkpt_dir, fc1_dims, fc2_dims)
         self.log_prob = None
 
     def choose_action(self, observation):
@@ -93,3 +102,9 @@ class ActorCriticAgent:
 
         (actor_loss + critic_loss).backward()
         self.actor_critic.optimizer.step()
+
+    def save_models(self):
+        self.actor_critic.save_checkpoint()
+
+    def load_models(self):
+        self.actor_critic.load_checkpoint()
