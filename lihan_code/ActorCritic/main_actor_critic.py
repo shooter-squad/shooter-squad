@@ -1,12 +1,12 @@
 import sys
 
+# Adds Env folder to the system path
+sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
+
 import numpy as np
 
 from actor_critic import ActorCriticAgent
 from utils import plot_learning_curve, make_env
-
-# Adds Env folder to the system path
-sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
 
 if __name__ == '__main__':
     env_name = 'shooter'
