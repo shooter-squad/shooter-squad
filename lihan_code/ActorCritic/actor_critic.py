@@ -6,18 +6,43 @@ import torch.optim as optim
 
 
 class ActorCriticNetwork(nn.Module):
+    """
+    The network shared by both actor and critic. The only difference is the output layer.
+    """
+
     def __init__(self, lr, input_dims, n_actions, fc1_dims=256, fc2_dims=256):
         super(ActorCriticNetwork, self).__init__()
-        self.fc1 = nn.Linear(*input_dims, fc1_dims)
+
+        self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, 3, stride=1)
+
+        fc_input_dims = self.calculate_conv_output_dims(input_dims)
+
+        self.fc1 = nn.Linear(fc_input_dims, fc1_dims)
         self.fc2 = nn.Linear(fc1_dims, fc2_dims)
         self.pi = nn.Linear(fc2_dims, n_actions)
         self.v = nn.Linear(fc2_dims, 1)
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        print(self.device)
         self.to(self.device)
 
+    def calculate_conv_output_dims(self, input_dims):
+        state = T.zeros(1, *input_dims)
+        dims = self.conv1(state)
+        dims = self.conv2(dims)
+        dims = self.conv3(dims)
+        return int(np.prod(dims.size()))
+
     def forward(self, state):
-        x = F.relu(self.fc1(state))
+        conv1 = F.relu(self.conv1(state))
+        conv2 = F.relu(self.conv2(conv1))
+        conv3 = F.relu(self.conv3(conv2))
+        # conv3 shape is BS x n_filters x H x W
+        conv_state = conv3.view(conv3.size()[0], -1)
+
+        x = F.relu(self.fc1(conv_state))
         x = F.relu(self.fc2(x))
         pi = self.pi(x)
         v = self.v(x)
@@ -25,7 +50,11 @@ class ActorCriticNetwork(nn.Module):
         return (pi, v)
 
 
-class ActorCriticAgent():
+class ActorCriticAgent:
+    """
+    The agent responsible for choosing action and learning.
+    """
+
     def __init__(self, lr, input_dims, fc1_dims, fc2_dims, n_actions,
                  gamma=0.99):
         self.gamma = gamma
