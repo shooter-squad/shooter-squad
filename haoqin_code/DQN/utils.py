@@ -122,7 +122,6 @@ class StackFrames(gym.ObservationWrapper):
 
 def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
              no_ops=0, fire_first=False):
-    env = None
     if env_name == 'shooter':
         env = ShooterEnv()
     else:
