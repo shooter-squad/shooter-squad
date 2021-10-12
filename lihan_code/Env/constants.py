@@ -30,7 +30,7 @@ TITLE = "AI bot"
 
 WIDTH = 600
 HEIGHT = 500
-FPS = 150
+FPS = 60
 VEL = 5
 
 BULLET_WIDTH = 5
