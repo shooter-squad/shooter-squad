@@ -61,7 +61,7 @@ if __name__ == '__main__':
             # if not load_checkpoint:
             #     agent.save_models()
             best_score = avg_score
-        if i % 50 = 49:
+        if i % 50 == 49:
             agent.save_models()
 
         eps_history.append(agent.epsilon)
