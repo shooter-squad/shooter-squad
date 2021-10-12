@@ -15,7 +15,7 @@ if __name__ == '__main__':
     agent = ActorCriticAgent(gamma=0.99, lr=5e-6, input_dims=(env.observation_space.shape),
                              n_actions=env.action_space.n, fc1_dims=2048, fc2_dims=1536, chkpt_dir='models/')
 
-    n_games = 4000
+    n_games = 3000
     load_checkpoint = False
 
     if load_checkpoint:
@@ -58,6 +58,9 @@ if __name__ == '__main__':
                 i, score, avg_score, best_score, n_steps))
         print('episode:', i, ', score:', score, ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
               ', steps:', n_steps)
+
+        if i % 50 == 4:
+            agent.save_models()
 
     x = [i + 1 for i in range(n_games)]
     plot_learning_curve(x, scores, figure_file)

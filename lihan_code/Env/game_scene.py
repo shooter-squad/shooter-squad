@@ -3,8 +3,8 @@ import os
 
 import pygame
 
-from constants import *
-from spaceship import Spaceship
+from .constants import *
+from .spaceship import Spaceship
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
