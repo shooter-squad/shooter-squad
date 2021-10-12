@@ -6,7 +6,7 @@ from gym import wrappers
 import time
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
+sys.path.insert(0, r'/home/haoqindegcp/shooter-squad/haoqin_code')
 from Env import *
 
 

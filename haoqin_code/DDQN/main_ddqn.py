@@ -2,18 +2,24 @@ import gym
 import numpy as np
 from ddqn_agent import DDQNAgent
 from utils import plot_learning_curve, make_env
+import sys
+sys.path.insert(0, r'/home/haoqindegcp/shooter-squad/haoqin_code')
+from Env import *
 
 if __name__ == '__main__':
-    env = make_env('PongNoFrameskip-v4')
+    env_name = 'shooter'
+    env = make_env(env_name)
+
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 100
+    n_games = 2000
+
     agent = DDQNAgent(gamma=0.99, epsilon=1.0, lr=0.0001,
                      input_dims=(env.observation_space.shape),
-                     n_actions=env.action_space.n, mem_size=50000, eps_min=0.1,
-                     batch_size=32, replace=10000, eps_dec=1e-5,
+                     n_actions=env.action_space.n, mem_size=30000, eps_min=0.1,
+                     batch_size=64, replace=10000, eps_dec=1e-5,
                      chkpt_dir='models/', algo='DDQNAgent',
-                     env_name='PongNoFrameskip-v4')
+                     env_name=env_name)
 
     if load_checkpoint:
         agent.load_models()
@@ -53,6 +59,8 @@ if __name__ == '__main__':
             #if not load_checkpoint:
             #    agent.save_models()
             best_score = avg_score
+        if i % 50 == 49:
+            agent.save_models()
 
         eps_history.append(agent.epsilon)
         if load_checkpoint and n_steps >= 18000:
