@@ -10,12 +10,13 @@ class DeepQNetwork(nn.Module):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-
+        print(input_dims[0])
         self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
         self.conv3 = nn.Conv2d(64, 64, 3, stride=1)
 
         fc_input_dims = self.calculate_conv_output_dims(input_dims)
+        print(fc_input_dims)
 
         self.fc1 = nn.Linear(fc_input_dims, 512)
         self.fc2 = nn.Linear(512, n_actions)
