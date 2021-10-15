@@ -2,8 +2,8 @@ from typing import List, Tuple
 
 import pygame
 
-from bullet import Bullet
-from constants import *
+from .bullet import Bullet
+from .constants import *
 
 
 class Spaceship(pygame.sprite.Sprite):

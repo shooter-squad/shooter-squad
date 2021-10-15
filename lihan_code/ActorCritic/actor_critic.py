@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import torch as T
 import torch.nn as nn
@@ -10,10 +12,11 @@ class ActorCriticNetwork(nn.Module):
     The network shared by both actor and critic. The only difference is the output layer.
     """
 
-    def __init__(self, lr, input_dims, n_actions, chkpt_dir, fc1_dims=256, fc2_dims=256):
+    def __init__(self, lr, input_dims, n_actions, chkpt_dir, name, fc1_dims=256, fc2_dims=128):
         super(ActorCriticNetwork, self).__init__()
 
         self.checkpoint_dir = chkpt_dir
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
 
         self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
@@ -71,7 +74,7 @@ class ActorCriticAgent:
         self.lr = lr
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
-        self.actor_critic = ActorCriticNetwork(lr, input_dims, n_actions, chkpt_dir, fc1_dims, fc2_dims)
+        self.actor_critic = ActorCriticNetwork(lr, input_dims, n_actions, chkpt_dir, 'actor_critic_network', fc1_dims, fc2_dims)
         self.log_prob = None
 
     def choose_action(self, observation):
