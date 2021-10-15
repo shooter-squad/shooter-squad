@@ -3,7 +3,7 @@ import numpy as np
 from ddqn_agent import DDQNAgent
 from utils import plot_learning_curve, make_env
 import sys
-sys.path.insert(0, r'/home/haoqindegcp/shooter-squad/haoqin_code')
+sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
 from Env import *
 
 if __name__ == '__main__':

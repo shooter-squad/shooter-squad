@@ -84,6 +84,7 @@ class DRQNAgent(object):
         self.replace_target_network()
 
         states, actions, rewards, states_, dones = self.sample_memory() # NOTE: state: [32, 4, 84, 84]; actions: [32]; dones: [32]; rewards:[32]
+        # states = states[:, -1, :, :].unsqueeze(1)
         indices = np.arange(self.batch_size)
 
         # temporal difference learning
