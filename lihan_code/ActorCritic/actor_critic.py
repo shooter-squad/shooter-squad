@@ -12,7 +12,7 @@ class ActorCriticNetwork(nn.Module):
     The network shared by both actor and critic. The only difference is the output layer.
     """
 
-    def __init__(self, lr, input_dims, n_actions, chkpt_dir, name, fc1_dims=256, fc2_dims=256):
+    def __init__(self, lr, input_dims, n_actions, chkpt_dir, name, fc1_dims=256, fc2_dims=128):
         super(ActorCriticNetwork, self).__init__()
 
         self.checkpoint_dir = chkpt_dir

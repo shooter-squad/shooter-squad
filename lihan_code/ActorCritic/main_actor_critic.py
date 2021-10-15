@@ -13,7 +13,7 @@ if __name__ == '__main__':
     env = make_env(env_name)
 
     agent = ActorCriticAgent(gamma=0.99, lr=5e-6, input_dims=(env.observation_space.shape),
-                             n_actions=env.action_space.n, fc1_dims=2048, fc2_dims=1536, chkpt_dir='models/')
+                             n_actions=env.action_space.n, fc1_dims=512, fc2_dims=256, chkpt_dir='models/')
 
     n_games = 3000
     load_checkpoint = False
