@@ -26,10 +26,9 @@ class ShooterEnv(Env):
         self.info = {}
 
     def step(self, action_num: int):
-        self.game_scene.Play(action_num)
+        self.done = self.game_scene.Play(action_num)
         self.reward = self.game_scene.Reward()
         self.state = self.game_scene.ScreenShot()
-        self.done = self.game_scene.Done()
         self.info = {}
 
         return self.state, self.reward, self.done, self.info

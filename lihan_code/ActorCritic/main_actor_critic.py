@@ -36,6 +36,7 @@ if __name__ == '__main__':
         done = False
         observation = env.reset()
         score = 0
+        cur_step = 0
 
         while not done:
             action = agent.choose_action(observation)
@@ -44,13 +45,24 @@ if __name__ == '__main__':
             agent.learn(observation, reward, observation_, done)
             observation = observation_
 
-            n_steps += 1
+            cur_step += 1
+
+            if cur_step >= 3000:
+                done = True
+
+        if cur_step >= 3000:
+            print('Error: game steps too big.')
+            continue
+
+        n_steps += cur_step
 
         scores.append(score)
 
         avg_score = np.mean(scores[-100:])
 
         if avg_score > best_score:
+            if not load_checkpoint:
+                agent.save_models()
             best_score = avg_score
 
         output_file.write(
@@ -58,9 +70,6 @@ if __name__ == '__main__':
                 i, score, avg_score, best_score, n_steps))
         print('episode:', i, ', score:', score, ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
               ', steps:', n_steps)
-
-        if i % 50 == 4:
-            agent.save_models()
 
     x = [i + 1 for i in range(n_games)]
     plot_learning_curve(x, scores, figure_file)
