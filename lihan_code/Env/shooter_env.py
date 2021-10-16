@@ -17,8 +17,8 @@ class ShooterEnv(Env):
         # self.observation_space = self.game_scene.ScreenShot()
         self.observation_shape = (WIDTH, HEIGHT, 3)
         self.observation_space = Box(low=np.zeros(self.observation_shape),
-                                     high=np.ones(self.observation_shape),
-                                     dtype=np.float16)
+                                     high=np.full(self.observation_shape, 255),
+                                     dtype=np.uint8)
         self.state = self.game_scene.ScreenShot()
 
         self.reward = 0
