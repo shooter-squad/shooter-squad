@@ -17,8 +17,8 @@ class ShooterEnv(Env):
         # self.observation_space = self.game_scene.ScreenShot()
         self.observation_shape = (WIDTH, HEIGHT, 3)
         self.observation_space = Box(low=np.zeros(self.observation_shape),
-                                     high=np.ones(self.observation_shape),
-                                     dtype=np.float16)
+                                     high=np.full(self.observation_shape, 255),
+                                     dtype=np.uint8)
         self.state = self.game_scene.ScreenShot()
 
         self.reward = 0
@@ -26,10 +26,9 @@ class ShooterEnv(Env):
         self.info = {}
 
     def step(self, action_num: int):
-        self.game_scene.Play(action_num)
+        self.done = self.game_scene.Play(action_num)
         self.reward = self.game_scene.Reward()
         self.state = self.game_scene.ScreenShot()
-        self.done = self.game_scene.Done()
         self.info = {}
 
         return self.state, self.reward, self.done, self.info

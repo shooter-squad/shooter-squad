@@ -6,7 +6,7 @@ from gym import wrappers
 import time
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
+# sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
 from Env import *
 
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 3000
+    n_games = 1000
 
     agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),

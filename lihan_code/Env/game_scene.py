@@ -2,11 +2,12 @@ import random
 import os
 
 import pygame
+import numpy as np
 
 from .constants import *
 from .spaceship import Spaceship
 
-os.environ["SDL_VIDEODRIVER"] = "dummy"
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 class GameScene(object):
     """
@@ -64,7 +65,7 @@ class GameScene(object):
         self.enemy_group.add(self.enemy)
 
         self.clock = pygame.time.Clock()
-        self.run = True
+        self.done = False
         self.reward = 0
         self.enemy_direction = 'left'
         self.Reset()
@@ -77,7 +78,7 @@ class GameScene(object):
         return pixels_arr
 
     def Done(self):
-        return not self.run
+        return self.done
 
     def Reward(self):
         return self.reward
@@ -85,7 +86,7 @@ class GameScene(object):
     def Reset(self):
         self.player.reset()
         self.enemy.reset()
-        self.run = True
+        self.done = False
 
     def Play(self, player_action_num: int):
         # Human input
@@ -102,8 +103,8 @@ class GameScene(object):
                     if event.key == pygame.K_SPACE:
                         player_action_num = 3
 
-        if not self.run:
-            return
+        if self.done:
+            return True
 
         if player_action_num == -1:
             player_action_num = 0
@@ -117,13 +118,15 @@ class GameScene(object):
 
         if winner_text != "":
             self.draw_winner(winner_text)
-            self.run = False
-            return
+            self.done = True
+            return True
 
         self.reward = 0
         self.update(player_action_num)
         self.draw_window()
         self.clock.tick(FPS)
+
+        return False
 
     def Exit(self):
         pygame.quit()
@@ -139,10 +142,10 @@ class GameScene(object):
         # Enemy action is randomly chosen
         # enemy_action = Action(random.randint(0, len(Action) - 1))
         if self.enemy_direction == 'right':
-            if self.enemy.rect.left <= 50:
+            if self.enemy.rect.left <= 0:
                 self.enemy_direction = 'left'
         if self.enemy_direction == 'left':
-            if self.enemy.rect.right >= WIDTH - 50:
+            if self.enemy.rect.right >= WIDTH:
                 self.enemy_direction = 'right'
         enemy_action = Action.LEFT if self.enemy_direction == 'left' else Action.RIGHT
         enemy_action = enemy_action if random.random() < 0.7 else Action.FIRE
