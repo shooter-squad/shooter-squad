@@ -1,8 +1,10 @@
 import os
+import collections
 
 import gym
 import numpy as np
 import torch
+import cv2
 from gym.spaces.box import Box
 from gym.wrappers.clip_action import ClipAction
 from stable_baselines3.common.atari_wrappers import (ClipRewardEnv,
@@ -41,7 +43,10 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
             env = dmc2gym.make(domain_name=domain, task_name=task)
             env = ClipAction(env)
         else:
-            env = ShooterEnv()
+            if env_id == 'shooter-env':
+                env = ShooterEnv()
+            else:
+                env = gym.make(env_id)
 
         is_atari = hasattr(gym.envs, 'atari') and isinstance(
             env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
@@ -67,10 +72,9 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
                 env = WarpFrame(env, width=84, height=84)
                 env = ClipRewardEnv(env)
         elif len(env.observation_space.shape) == 3:
-            raise NotImplementedError(
-                "CNN models work only for atari,\n"
-                "please use a custom wrapper for a custom pixel input env.\n"
-                "See wrap_deepmind for an example.")
+            env = RepeatActionAndMaxFrame(env, repeat=4, clip_reward=False, no_ops=0, fire_first=False)
+            env = PreprocessFrame((84, 84, 1), env)
+            env = StackFrames(env, repeat=4)
 
         # If the input has shape (W,H,3), wrap for PyTorch convolutions
         obs_shape = env.observation_space.shape
@@ -95,10 +99,10 @@ def make_vec_envs(env_name,
         for i in range(num_processes)
     ]
 
-    # if len(envs) > 1:
-    #     envs = SubprocVecEnv(envs)
-    # else:
-    envs = DummyVecEnv(envs)
+    if len(envs) > 1:
+        envs = SubprocVecEnv(envs)
+    else:
+        envs = DummyVecEnv(envs)
 
     if len(envs.observation_space.shape) == 1:
         if gamma is None:
@@ -259,3 +263,88 @@ class VecPyTorchFrameStack(VecEnvWrapper):
 
     def close(self):
         self.venv.close()
+
+
+class RepeatActionAndMaxFrame(gym.Wrapper):
+    def __init__(self, env=None, repeat=4, clip_reward=False, no_ops=0,
+                 fire_first=False):
+        super(RepeatActionAndMaxFrame, self).__init__(env)
+        self.repeat = repeat
+        self.shape = env.observation_space.low.shape
+        self.frame_buffer = np.zeros_like((2, self.shape))
+        self.clip_reward = clip_reward
+        self.no_ops = no_ops
+        self.fire_first = fire_first
+
+    def step(self, action):
+        t_reward = 0.0
+        done = False
+        for i in range(1):
+            obs, reward, done, info = self.env.step(action)
+            if self.clip_reward:
+                reward = np.clip(np.array([reward]), -1, 1)[0]
+            t_reward += reward
+            idx = i % 2
+            self.frame_buffer[idx] = obs
+            if done:
+                break
+
+        max_frame = np.maximum(self.frame_buffer[0], self.frame_buffer[1])
+        return max_frame, t_reward, done, info
+
+    def reset(self):
+        obs = self.env.reset()
+        no_ops = np.random.randint(self.no_ops)+1 if self.no_ops > 0 else 0
+        for _ in range(no_ops):
+            _, _, done, _ = self.env.step(0)
+            if done:
+                self.env.reset()
+        if self.fire_first:
+            assert self.env.unwrapped.get_action_meanings()[1] == 'FIRE'
+            obs, _, _, _ = self.env.step(1)
+
+        self.frame_buffer = np.zeros_like((2,self.shape))
+        self.frame_buffer[0] = obs
+
+        return obs
+
+
+class PreprocessFrame(gym.ObservationWrapper):
+    def __init__(self, shape, env=None):
+        super(PreprocessFrame, self).__init__(env)
+        self.shape = (shape[2], shape[0], shape[1])
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0,
+                                    shape=self.shape, dtype=np.float32)
+
+    def observation(self, obs):
+        new_frame = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
+        # new_frame = obs
+        resized_screen = cv2.resize(new_frame, self.shape[1:],
+                                    interpolation=cv2.INTER_AREA)
+        new_obs = np.array(resized_screen, dtype=np.uint8).reshape(self.shape)
+        new_obs = new_obs / 255.0
+
+        return new_obs
+
+
+class StackFrames(gym.ObservationWrapper):
+    def __init__(self, env, repeat):
+        super(StackFrames, self).__init__(env)
+        self.observation_space = gym.spaces.Box(
+                            env.observation_space.low.repeat(repeat, axis=0),
+                            env.observation_space.high.repeat(repeat, axis=0),
+                            dtype=np.float32)
+        self.stack = collections.deque(maxlen=repeat)
+
+    def reset(self):
+        self.stack.clear()
+        observation = self.env.reset()
+        for _ in range(self.stack.maxlen):
+            self.stack.append(observation)
+
+        return np.array(self.stack).reshape(self.observation_space.low.shape)
+
+    def observation(self, observation):
+        self.stack.append(observation)
+
+        return np.array(self.stack).reshape(self.observation_space.low.shape)
