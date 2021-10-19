@@ -7,7 +7,7 @@ import numpy as np
 from .constants import *
 from .spaceship import Spaceship
 
-os.environ["SDL_VIDEODRIVER"] = "dummy"
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 class GameScene(object):
     """

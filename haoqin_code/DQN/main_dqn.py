@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 4000
+    n_games = 3000
     print('env obervation space shape is ', env.observation_space.shape)
     agent = DQNAgent(gamma=0.99, epsilon=0, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -50,6 +50,7 @@ if __name__ == '__main__':
         score = 0
         while not done:
             # // NOTE: whenever the agent makes a move, he enters a new state. it store the observation, action, reward, obseravation_, done in his memory for REPLAY, which has size of 40000.
+            print('ENTERING THE GAME')
             action = agent.choose_action(observation) # * action shape is scalar (e.g. 3)
             # print('action shape is: ', action)
             # print('in one iteration')
@@ -64,7 +65,7 @@ if __name__ == '__main__':
             # fire_file.close()
             
             observation_, reward, done, info = env.step(action) # * observation shape is (4, 84, 84), reward = scalar, all variables are unbatched
-            # print(observation_.shape, reward)
+            print('action shape: ', action, 'obseravation shape', observation.shape)
             time_prev = time.time()
             score += reward
 
