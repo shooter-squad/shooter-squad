@@ -19,9 +19,9 @@ from Env import *
 class RNNIndividual(Individual):
 
     def get_model(self, input_size, hidden_size, output_size) -> NeuralNetwork:
-        return RNN(input_size, hidden_size, 12, output_size)
+        return RNN(input_size, hidden_size, 20, output_size)
 
-    def run_single(self, env, n_episodes=2000, render=False) -> Tuple[float, np.array]:
+    def run_single(self, env, n_episodes=1800, render=False) -> Tuple[float, np.array]:
         obs = env.reset().flatten()
         fitness = 0
         hidden = self.nn.init_hidden()
@@ -84,19 +84,19 @@ if __name__ == '__main__':
     env = make_env(env_name)
 
     #must be even
-    POPULATION_SIZE = 20
-    MAX_GENERATION = 500
-    MUTATION_RATE = 0.2
-    CROSSOVER_RATE = 0.8
-    MUTATION_DECREMENT = 0.1/500
+    POPULATION_SIZE = 40
+    MAX_GENERATION = 9999999
+    MUTATION_RATE = 0.15
+    CROSSOVER_RATE = 0.9
+    MUTATION_DECREMENT = 0
 
     INPUT_SIZE = env.observation_space.shape[0] * env.observation_space.shape[1] * env.observation_space.shape[2]
     print("input size:",INPUT_SIZE)
-    HIDDEN_SIZE = 40
+    HIDDEN_SIZE = 64
     OUTPUT_SIZE = 4
 
     p = Population(RNNIndividual(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE),
                    POPULATION_SIZE, MAX_GENERATION, MUTATION_RATE, CROSSOVER_RATE, 0.0, MUTATION_DECREMENT)
-    p.run(env, generation, verbose=True, output_folder='outputs/output3/')
+    p.run(env, generation, verbose=True, output_folder='outputs/output4/')
 
     env.close()

@@ -36,11 +36,6 @@ class Population:
             for p in self.old_population:  
                 p.calculate_fitness(env)
                 
-
-            print("Time: ", time.time()-t, np.mean( self.old_population[-1].weights_biases))
-            t = time.time()
-
-               
             self.new_population = [None for _ in range(self.pop_size)]
             run_generation(env,
                            self.old_population,
@@ -60,12 +55,12 @@ class Population:
             if (i%10 == 9):
                 plt.figure(0)
                 plt.scatter(np.arange(i+1),mean_l)
-                np.save('plot/overall3/Gen'+str(i), np.array(mean_l))
-                plt.savefig('plot/overall3/Gen'+str(i)+'.jpg')
+                np.save('plot/overall4/Gen'+str(i), np.array(mean_l))
+                plt.savefig('plot/overall4/Gen'+str(i)+'.jpg')
                 plt.close()
                 plt.figure(1)
                 plt.scatter(np.arange(self.pop_size),np.array([k.fitness for k in self.new_population]))
-                plt.savefig('plot/genSample3/Gen'+str(i)+'.jpg')
+                plt.savefig('plot/genSample4/Gen'+str(i)+'.jpg')
                 plt.close()
                 print("Plot saved......\n")
                 
@@ -79,8 +74,11 @@ class Population:
                 self.save_model_parameters(output_folder, i, save_as_pytorch)
                 best_model = new_best_model
 
-            self.p_mutation -= self.p_mutation_decrease
-            print(self.p_mutation)
+            # self.p_mutation -= self.p_mutation_decrease
+            # print(self.p_mutation)
+            print("Time: ", time.time()-t)
+            print()
+            t = time.time()
 
         if output_folder:
             self.save_model_parameters(output_folder, self.max_generation, save_as_pytorch)
@@ -101,7 +99,7 @@ class Population:
     def show_stats(self, n_gen):
         mean, min, max = statistics(self.new_population)
         date = self.now()
-        stats = f"{date} - generation {n_gen + 1} | mean: {mean}\tmin: {min}\tmax: {max}\n"
+        stats = f"{date} - generation {n_gen + 1} | mean: {mean}\tmin: {min}\tmax: {max}"
         print(stats)
         return mean, min, max
 
@@ -110,7 +108,8 @@ class Population:
 
     def save_model_parameters(self, output_folder, iterations, save_as_pytorch=False):
         best_model = self.get_best_model_parameters()
-        file_name = self.get_file_name(self.now()) + f'_I={iterations}_SCORE={best_model.fitness}.npy'
+        # file_name = self.get_file_name(self.now()) + f'Gen{iterations}_SCORE={best_model.fitness}.npy'
+        file_name = f'Gen{iterations}_SCORE={best_model.fitness}.npy'
         output_filename = output_folder + '-' + file_name
         if save_as_pytorch:
             torch.save(best_model.weights_biases, output_filename)
@@ -124,12 +123,7 @@ class Population:
         return sorted(self.new_population, key=lambda ind: ind.fitness, reverse=True)[0]
 
     def get_file_name(self, date):
-        return '{}_NN={}_POPSIZE={}_GEN={}_PMUTATION_{}_PCROSSOVER_{}'.format(date,
-                                                                              self.new_population[0].__class__.__name__,
-                                                                              self.pop_size,
-                                                                              self.max_generation,
-                                                                              self.p_mutation,
-                                                                              self.p_crossover)
+        return ""
 
     @staticmethod
     def now():
