@@ -1,7 +1,7 @@
 import sys
 
 # Adds Env folder to the system path
-sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
+sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\lihan_code')
 
 import numpy as np
 

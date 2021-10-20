@@ -4,7 +4,7 @@ import numpy as np
 from dueling_ddqn_agent import DuelingDDQNAgent
 from utils import plot_learning_curve, make_env
 import sys
-sys.path.insert(0, r'/home/haoqindegcp/shooter-squad/haoqin_code')
+sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
 from Env import *
 
 
@@ -14,8 +14,8 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 2000
-
+    n_games = 3000
+    output_file = open("stats_dueling_ddqn2.txt", "w")
     agent = DuelingDDQNAgent(gamma=0.99, epsilon=1.0, lr=0.0001,
                      input_dims=(env.observation_space.shape),
                      n_actions=env.action_space.n, mem_size=30000, eps_min=0.1,
@@ -56,17 +56,19 @@ if __name__ == '__main__':
         print('episode: ', i,'score: ', score,
              ' average score %.1f' % avg_score, 'best score %.2f' % best_score,
             'epsilon %.2f' % agent.epsilon, 'steps', n_steps)
-
+        output_file.write('episode: ' + str(i) + ' score: ' + str(score) +
+                ' average score: ' + str(avg_score) + ' best score: ' + str(best_score) +
+                ' epsilon: ' + str(agent.epsilon) + ' steps: ' + str(n_steps) + '\n')
         if avg_score > best_score:
-            # if not load_checkpoint:
-            #     agent.save_models()
+            if not load_checkpoint:
+                agent.save_models()
             best_score = avg_score
-        if i % 50 == 49:
-            agent.save_models()
+        # if i % 50 == 49:
+        #     agent.save_models()
 
         eps_history.append(agent.epsilon)
         if load_checkpoint and n_steps >= 18000:
             break
-
+    output_file.close()        
     x = [i+1 for i in range(len(scores))]
     plot_learning_curve(steps_array, scores, eps_history, figure_file)

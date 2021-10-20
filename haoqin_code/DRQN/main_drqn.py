@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    n_games = 4000
+    n_games = 3000
 
     agent = DRQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
@@ -41,8 +41,8 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
-    output_file = open("stats.txt", "w")
-    accuracy_file = open('accuracy_image_neg', 'w')
+    output_file = open("stats_lstm2.txt", "w")
+    # output_file = open('accuracy_image_neg', 'w')
     for i in range(n_games):
         done = False
         observation = env.reset()
@@ -63,7 +63,7 @@ if __name__ == '__main__':
             # fire_file.close()
             
             observation_, reward, done, info = env.step(action)
-            # print(observation.shape)
+            # print('observation shape', observation.shape)
             time_prev = time.time()
             score += reward
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         print('episode: ', i,', score: ', score,
                 ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
                 ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
-        accuracy_file.write('episode: ' + str(i) + ' score: ' + str(score) +
+        output_file.write('episode: ' + str(i) + ' score: ' + str(score) +
                 ' average score: ' + str(avg_score) + ' best score: ' + str(best_score) +
                 ' epsilon: ' + str(agent.epsilon) + ' steps: ' + str(n_steps) + '\n')
         if avg_score > best_score:
@@ -98,6 +98,6 @@ if __name__ == '__main__':
 
         if i % 50 == 49:
             agent.save_models()
-    accuracy_file.close()
+    output_file.close()
     x = [i + 1 for i in range(len(scores))]
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
