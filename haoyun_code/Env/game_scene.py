@@ -139,10 +139,10 @@ class GameScene(object):
         # Enemy action is randomly chosen
         # enemy_action = Action(random.randint(0, len(Action) - 1))
         if self.enemy_direction == 'right':
-            if self.enemy.rect.left <= 50:
+            if self.enemy.rect.left <= 5:
                 self.enemy_direction = 'left'
         if self.enemy_direction == 'left':
-            if self.enemy.rect.right >= WIDTH - 50:
+            if self.enemy.rect.right >= WIDTH - 5:
                 self.enemy_direction = 'right'
         enemy_action = Action.LEFT if self.enemy_direction == 'left' else Action.RIGHT
         enemy_action = enemy_action if random.random() < 0.7 else Action.FIRE

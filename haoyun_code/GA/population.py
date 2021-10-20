@@ -28,7 +28,7 @@ class Population:
 
     @timing
     def run(self, env, run_generation: Callable, verbose=False, log=False, output_folder=None, save_as_pytorch=False):
-        best_model = sorted(self.old_population, key=lambda ind: ind.fitness, reverse=True)[0]
+        
         t = time.time()
         mean_l = []
         for i in range(self.max_generation):
@@ -63,16 +63,13 @@ class Population:
                 plt.savefig('plot/genSample4/Gen'+str(i)+'.jpg')
                 plt.close()
                 print("Plot saved......\n")
-                
+                self.save_model_parameters(output_folder, i, save_as_pytorch)
+                print('Model saved......')
 
             self.update_old_population()
 
-            new_best_model = self.get_best_model_parameters()
 
-            if new_best_model.fitness > best_model.fitness:
-                print('Saving new best model with fitness: {}'.format(new_best_model.fitness))
-                self.save_model_parameters(output_folder, i, save_as_pytorch)
-                best_model = new_best_model
+                
 
             # self.p_mutation -= self.p_mutation_decrease
             # print(self.p_mutation)

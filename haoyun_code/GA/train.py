@@ -19,11 +19,11 @@ from Env import *
 class RNNIndividual(Individual):
 
     def get_model(self, input_size, hidden_size, output_size) -> NeuralNetwork:
-        return RNN(input_size, hidden_size, 20, output_size)
+        return RNN(input_size, hidden_size, 12, output_size)
 
     def run_single(self, env, n_episodes=1800, render=False) -> Tuple[float, np.array]:
         obs = env.reset().flatten()
-        fitness = 0
+        fitness = -10
         hidden = self.nn.init_hidden()
         for i in range(n_episodes):
             if render:
@@ -43,12 +43,12 @@ class RNNIndividual(Individual):
 
 
 def generation(env, old_population, new_population, p_mutation, p_crossover, p_iversion=0.0):
+    parent1, parent2 = ranking_selection(old_population)
     for i in range(0, len(old_population) - 1, 2):
         # Selection
         # parent1 = roulette_wheel_selection(old_population)
         # parent2 = roulette_wheel_selection(old_population)
-        parent1, parent2 = ranking_selection(old_population)
-
+        
         # Crossover
         child1 = copy.deepcopy(parent1)
         child2 = copy.deepcopy(parent2)
@@ -64,16 +64,19 @@ def generation(env, old_population, new_population, p_mutation, p_crossover, p_i
         child1.update_model()
         child2.update_model()
 
-        child1.calculate_fitness(env)
-        child2.calculate_fitness(env)
-
-        # If children fitness is greater thant parents update population
-        if child1.fitness + child2.fitness > parent1.fitness + parent2.fitness:
+        if random.random() < 0.75:
             new_population[i] = child1
             new_population[i + 1] = child2
         else:
-            new_population[i] = parent1
-            new_population[i + 1] = parent2
+            child1.calculate_fitness(env)
+            child2.calculate_fitness(env)
+            # If children fitness is greater than parents update population
+            if child1.fitness + child2.fitness > parent1.fitness + parent2.fitness:
+                new_population[i] = child1
+                new_population[i + 1] = child2
+            else:
+                new_population[i] = parent1
+                new_population[i + 1] = parent2
 
 
 if __name__ == '__main__':
@@ -84,7 +87,7 @@ if __name__ == '__main__':
     env = make_env(env_name)
 
     #must be even
-    POPULATION_SIZE = 40
+    POPULATION_SIZE = 24
     MAX_GENERATION = 9999999
     MUTATION_RATE = 0.15
     CROSSOVER_RATE = 0.9
