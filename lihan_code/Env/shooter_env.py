@@ -2,8 +2,8 @@ import numpy as np
 from gym import Env
 from gym.spaces import Discrete, Box
 
-from .constants import *
-from .game_scene import GameScene
+from Env.constants import *
+from Env.game_scene import GameScene
 
 
 class ShooterEnv(Env):
@@ -24,14 +24,17 @@ class ShooterEnv(Env):
         self.reward = 0
         self.done = self.game_scene.Done()
         self.info = {}
+        self.additional_state = self.game_scene.AdditionalState()
 
     def step(self, action_num: int):
+        # More return values
         self.done = self.game_scene.Play(action_num)
         self.reward = self.game_scene.Reward()
         self.state = self.game_scene.ScreenShot()
         self.info = {}
+        self.additional_state = self.game_scene.AdditionalState()
 
-        return self.state, self.reward, self.done, self.info
+        return self.state, self.reward, self.done, self.info, self.additional_state
 
     def render(self, mode="human"):
         pass
@@ -39,7 +42,8 @@ class ShooterEnv(Env):
     def reset(self):
         self.game_scene.Reset()
         self.state = self.game_scene.ScreenShot()
-        return self.state
+        self.additional_state = self.game_scene.AdditionalState()
+        return self.state, self.additional_state
 
 
 if __name__ == '__main__':
