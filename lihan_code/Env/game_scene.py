@@ -1,16 +1,26 @@
+import math
 import random
-import os
 from typing import Tuple
 
 import pygame
 import numpy as np
 
 from Env.constants import *
-from Env.spaceship import Spaceship
-from Env.obstacle import Obstacle
 from Env.health_pack import HealthPack
+from Env.obstacle import Obstacle
+from Env.spaceship import Spaceship
+from Env.ultimate_ability import UltimateAbility
 
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+
+def calculate_distance(first: pygame.sprite.Sprite, second: pygame.sprite.Sprite) -> float:
+    """
+    Calculates the distance between two sprite using their center positions.
+    """
+    dist = math.sqrt((first.rect.centerx - second.rect.centerx) ** 2 + (first.rect.centery - second.rect.centery) ** 2)
+    return dist
+
 
 class GameScene(object):
     """
@@ -32,6 +42,7 @@ class GameScene(object):
         self.health_font = pygame.font.SysFont(HEALTH_FONT[0], HEALTH_FONT[1])
         self.winner_font = pygame.font.SysFont(WINNER_FONT[0], WINNER_FONT[1])
 
+        # Load images
         yellow_spaceship_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_IMAGE_PATH),
                                                         (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
         red_spaceship_image = pygame.transform.rotate(
@@ -46,9 +57,13 @@ class GameScene(object):
 
         self.obstacle_image = pygame.transform.scale(pygame.image.load(OBSTACLE_IMAGE_PATH),
                                                      (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
-
         self.health_pack_image = pygame.transform.scale(pygame.image.load(HEALTH_PACK_IMAGE_PATH),
                                                         (HEALTH_PACK_WIDTH, HEALTH_PACK_HEIGHT))
+
+        yellow_ultimate_ability_image = pygame.transform.scale(pygame.image.load(YELLOW_ULTIMATE_ABILITY_IMAGE_PATH),
+                                                               (ULTIMATE_ABILITY_WIDTH, ULTIMATE_ABILITY_HEIGHT))
+        red_ultimate_ability_image = pygame.transform.scale(pygame.image.load(RED_ULTIMATE_ABILITY_IMAGE_PATH),
+                                                            (ULTIMATE_ABILITY_WIDTH, ULTIMATE_ABILITY_HEIGHT))
 
         if PURE_COLOR_DISPLAY:
             self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
@@ -60,6 +75,7 @@ class GameScene(object):
             image=yellow_spaceship_image,
             screen_rect=self.screen.get_rect(),
             shielded_image=yellow_shielded_image,
+            ultimate_ability_image=yellow_ultimate_ability_image,
             start_health=YELLOW_START_HEALTH,
             start_x=YELLOW_START_POSITION[0],
             start_y=YELLOW_START_POSITION[1],
@@ -72,6 +88,7 @@ class GameScene(object):
         self.enemy = Spaceship(
             image=red_spaceship_image,
             shielded_image=red_shielded_image,
+            ultimate_ability_image=red_ultimate_ability_image,
             screen_rect=self.screen.get_rect(),
             start_health=RED_START_HEALTH,
             start_x=RED_START_POSITION[0],
@@ -93,6 +110,8 @@ class GameScene(object):
 
         self.Reset()
 
+    # ------------------------- Env wrapper methods -------------------------
+
     def ActionCount(self):
         return len(Action)
 
@@ -110,6 +129,11 @@ class GameScene(object):
         self.player.reset()
         self.enemy.reset()
         self.spawn_obstacles()
+        self.health_pack_group.empty()
+
+        self.reward = 0
+        self.enemy_direction = 'left' if random.random() < 0.5 else 'right'
+        self.frame_count = 0
         self.done = False
 
     def Play(self, player_action_num: int):
@@ -134,8 +158,10 @@ class GameScene(object):
                 player_action_num = 4
             if keys_pressed[pygame.K_SPACE]:
                 player_action_num = 5
-            if keys_pressed[pygame.K_0]:
+            if keys_pressed[pygame.K_q]:
                 player_action_num = 6
+            if keys_pressed[pygame.K_w]:
+                player_action_num = 7
 
         if player_action_num == -1:
             player_action_num = 0
@@ -159,21 +185,23 @@ class GameScene(object):
 
         return False
 
-    def AdditionalState(self) -> Tuple[int, int, int, int]:
+    def AdditionalState(self) -> Tuple[int, int, bool, int, int, bool]:
         """
         Returns additional state parameters
         """
         return (
             self.player.health,
             self.player.get_shield_availability(),
+            self.player.ultimate_available,
             self.enemy.health,
-            self.enemy.get_shield_availability()
+            self.enemy.get_shield_availability(),
+            self.enemy.ultimate_available
         )
 
     def Exit(self):
         pygame.quit()
 
-    # ------------------------- Display update methods -------------------------
+    # ------------------------- Game logic methods -------------------------
 
     def spawn_obstacles(self):
         """
@@ -200,11 +228,13 @@ class GameScene(object):
         )
         self.health_pack_group.add(health_pack)
 
-
-    def calculate_enemy_action(self):
+    def calculate_enemy_action(self) -> Action:
         """
         Pre-scripted behavior of enemy
         """
+        if self.enemy.ultimate_available and calculate_distance(self.enemy, self.player) <= ULTIMATE_ABILITY_WIDTH / 2:
+            return Action.USE_ULTIMATE_ABILITY
+
         if self.enemy_direction == 'right':
             if self.enemy.rect.left <= 0:
                 self.enemy_direction = 'left'
@@ -229,12 +259,14 @@ class GameScene(object):
         player_action = Action(player_action_num)
         self.player.update(player_action, self.obstacle_group.sprites() + [self.enemy])
         self.player.bullets.update()
+        self.player.ultimate_abilities.update()
 
         # Enemy action is calculated
         enemy_action = self.calculate_enemy_action()
 
         self.enemy.update(enemy_action, self.obstacle_group.sprites() + [self.player])
         self.enemy.bullets.update()
+        self.enemy.ultimate_abilities.update()
 
         # Spawn health pack if time is reached
         if self.frame_count == HEALTH_PACK_TIME_INTERVAL:
@@ -262,6 +294,26 @@ class GameScene(object):
         self.player.health += HEALTH_PACK_HEALTH_RECOVERED * len(hit_list)
         self.reward += Reward.PLAYER_GET_HEALTH_PACK.value * len(hit_list)
 
+        # 5) Player vs enemy ultimate
+        hit_list = pygame.sprite.spritecollide(self.player, self.enemy.ultimate_abilities, False,
+                                               pygame.sprite.collide_mask)
+        for hit in hit_list:
+            if isinstance(hit, UltimateAbility):
+                damage = hit.get_damage()
+                self.player.health -= damage
+                if damage > 0:
+                    self.reward += Reward.ULTIMATE_HIT_PLAYER.value
+
+        # 6) Enemy vs player ultimate
+        hit_list = pygame.sprite.spritecollide(self.enemy, self.player.ultimate_abilities, False,
+                                               pygame.sprite.collide_mask)
+        for hit in hit_list:
+            if isinstance(hit, UltimateAbility):
+                damage = hit.get_damage()
+                self.enemy.health -= damage
+                if damage > 0:
+                    self.reward += Reward.ULTIMATE_HIT_ENEMY.value
+
         if NEGATIVE_REWARD_ENABLED:
             self.reward -= NEGATIVE_REWARD
 
@@ -277,10 +329,12 @@ class GameScene(object):
         self.screen.blit(yellow_health_text, (10, 10))
 
         # Draw player
+        self.player.ultimate_abilities.draw(self.screen)
         self.player_group.draw(self.screen)
         self.player.bullets.draw(self.screen)
 
         # Draw enemy
+        self.enemy.ultimate_abilities.draw(self.screen)
         self.enemy_group.draw(self.screen)
         self.enemy.bullets.draw(self.screen)
 

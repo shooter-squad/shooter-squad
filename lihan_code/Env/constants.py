@@ -14,6 +14,7 @@ class Action(Enum):
     DOWN = 4
     FIRE = 5
     ACTIVATE_SHIELD = 6
+    USE_ULTIMATE_ABILITY = 7
 
 
 class Reward(Enum):
@@ -23,6 +24,8 @@ class Reward(Enum):
     BULLET_HIT_ENEMY = 10
     BULLET_HIT_PLAYER = -10
     PLAYER_GET_HEALTH_PACK = 10
+    ULTIMATE_HIT_ENEMY = 10
+    ULTIMATE_HIT_PLAYER = -10
 
 
 PURE_COLOR_DISPLAY = False
@@ -58,7 +61,7 @@ YELLOW_START_POSITION = (375, 650)
 SHIELD_DURATION = 60
 SHIELD_COOL_DOWN = 120  # Time since last time shield was activated
 
-OBSTACLE_COUNT = 3
+OBSTACLE_COUNT = 2
 OBSTACLE_WIDTH = 100
 OBSTACLE_HEIGHT = 60
 OBSTACLE_Y_MIN = 300
@@ -69,12 +72,19 @@ HEALTH_PACK_HEIGHT = 40
 HEALTH_PACK_HEALTH_RECOVERED = 1
 HEALTH_PACK_TIME_INTERVAL = 400
 
+ULTIMATE_ABILITY_WIDTH = 400
+ULTIMATE_ABILITY_HEIGHT = 400
+ULTIMATE_ABILITY_MAX_DAMAGE = 2
+ULTIMATE_ABILITY_DAMAGE_INTERVAL = 10
+
 YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_yellow.png')
 RED_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_red.png')
 YELLOW_SPACESHIP_SHIELDED_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_yellow_shielded.png')
 RED_SPACESHIP_SHIELDED_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_red_shielded.png')
 HEALTH_PACK_IMAGE_PATH = os.path.join('../../Assets', 'health_pack.png')
 OBSTACLE_IMAGE_PATH = os.path.join('../../Assets', 'obstacle.png')
+YELLOW_ULTIMATE_ABILITY_IMAGE_PATH = os.path.join('../../Assets', 'yellow_ultimate_ability.png')
+RED_ULTIMATE_ABILITY_IMAGE_PATH = os.path.join('../../Assets', 'red_ultimate_ability.png')
 SPACE_IMAGE_PATH = os.path.join('../../Assets', 'space.png')
 HIT_SOUND_PATH = os.path.join('../../Assets', "Grenade+1.mp3")
 FIRE_SOUND_PATH = os.path.join('../../Assets', "Gun+Silencer.mp3")

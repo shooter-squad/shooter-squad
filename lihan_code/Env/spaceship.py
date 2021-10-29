@@ -3,6 +3,7 @@ from typing import List, Tuple
 import pygame
 
 from Env.bullet import Bullet
+from Env.ultimate_ability import UltimateAbility
 from Env.constants import *
 
 
@@ -11,9 +12,9 @@ class Spaceship(pygame.sprite.Sprite):
     The spaceship class for both player and enemy.
     """
 
-    def __init__(self, image: pygame.Surface, shielded_image: pygame.Surface, screen_rect: pygame.Rect,
-                 start_health: int, start_x: int, start_y: int,
-                 color: Tuple[int, int, int], up_direction: bool):
+    def __init__(self, image: pygame.Surface, shielded_image: pygame.Surface, ultimate_ability_image: pygame.Surface,
+                 screen_rect: pygame.Rect, start_health: int, start_x: int, start_y: int, color: Tuple[int, int, int],
+                 up_direction: bool):
         super().__init__()
 
         if PURE_COLOR_DISPLAY:
@@ -40,6 +41,10 @@ class Spaceship(pygame.sprite.Sprite):
         self.shield_activated = False
         self.time_since_shield_activated = SHIELD_COOL_DOWN
 
+        self.ultimate_ability_image = ultimate_ability_image
+        self.ultimate_abilities = pygame.sprite.Group()
+        self.ultimate_available = True
+
     def update(self, action: Action, others: List[pygame.sprite.Sprite]):
         # Update counters
         self.time_since_shield_activated += 1
@@ -55,6 +60,8 @@ class Spaceship(pygame.sprite.Sprite):
             self.fire()
         elif action == Action.ACTIVATE_SHIELD:
             self.activate_shield()
+        elif action == Action.USE_ULTIMATE_ABILITY:
+            self.use_ultimate_ability()
         else:
             vel = 1 if self.up_direction else -1
             if action == Action.LEFT:
@@ -126,11 +133,31 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.centery = old_y
         self.shield_activated = False
 
+    def use_ultimate_ability(self):
+        if not self.ultimate_available:
+            return
+
+        ultimate_ability = UltimateAbility(
+            image=self.ultimate_ability_image,
+            centerx=self.rect.centerx,
+            centery=self.rect.centery
+        )
+        self.ultimate_abilities.add(ultimate_ability)
+        self.ultimate_available = False
+
     def reset(self):
         self.rect.x = self.start_x
         self.rect.y = self.start_y
         self.health = self.start_health
+
         self.bullets.empty()
+        self.time_since_last_bullet = BULLET_INTERVAL
+
+        self.deactivate_shield()
+        self.time_since_shield_activated = SHIELD_COOL_DOWN
+
+        self.ultimate_abilities.empty()
+        self.ultimate_available = True
 
     def is_dead(self) -> bool:
         return self.health <= 0

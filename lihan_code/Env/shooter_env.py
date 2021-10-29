@@ -50,11 +50,12 @@ if __name__ == '__main__':
     env = ShooterEnv()
 
     action_list = [
-        0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0
+        0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7
     ]
 
     for action in action_list:
-        env.step(action)
+        state, reward, done, info, additional = env.step(action)
+        print(reward, additional)
         env.step(action)
         env.step(action)
         env.step(action)
