@@ -11,6 +11,7 @@ from Env.obstacle import Obstacle
 from Env.spaceship import Spaceship
 from Env.ultimate_ability import UltimateAbility
 
+
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 
@@ -320,14 +321,6 @@ class GameScene(object):
     def draw_window(self):
         self.screen.blit(self.background, (0, 0))
 
-        # Display texts
-        red_health_text = self.health_font.render(
-            "Enemy Health: " + str(self.enemy.health), True, WHITE_COLOR)
-        yellow_health_text = self.health_font.render(
-            "Player Health: " + str(self.player.health), True, WHITE_COLOR)
-        self.screen.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
-        self.screen.blit(yellow_health_text, (10, 10))
-
         # Draw player
         self.player.ultimate_abilities.draw(self.screen)
         self.player_group.draw(self.screen)
@@ -341,6 +334,14 @@ class GameScene(object):
         # Draw obstacles and health packs
         self.obstacle_group.draw(self.screen)
         self.health_pack_group.draw(self.screen)
+
+        # Display texts
+        red_health_text = self.health_font.render(
+            "Enemy Health: " + str(self.enemy.health), True, WHITE_COLOR)
+        yellow_health_text = self.health_font.render(
+            "Player Health: " + str(self.player.health), True, WHITE_COLOR)
+        self.screen.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
+        self.screen.blit(yellow_health_text, (10, 10))
 
         pygame.display.update()
         self.frame_count += 1
