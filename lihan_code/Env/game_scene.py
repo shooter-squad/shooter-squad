@@ -8,7 +8,7 @@ import numpy as np
 from Env.constants import *
 from Env.spaceship import Spaceship
 from Env.obstacle import Obstacle
-
+from Env.health_pack import HealthPack
 
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -47,6 +47,9 @@ class GameScene(object):
         self.obstacle_image = pygame.transform.scale(pygame.image.load(OBSTACLE_IMAGE_PATH),
                                                      (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
 
+        self.health_pack_image = pygame.transform.scale(pygame.image.load(HEALTH_PACK_IMAGE_PATH),
+                                                        (HEALTH_PACK_WIDTH, HEALTH_PACK_HEIGHT))
+
         if PURE_COLOR_DISPLAY:
             self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
         else:
@@ -80,11 +83,14 @@ class GameScene(object):
         self.enemy_group.add(self.enemy)
 
         self.obstacle_group = pygame.sprite.Group()
+        self.health_pack_group = pygame.sprite.Group()
 
         self.clock = pygame.time.Clock()
         self.done = False
         self.reward = 0
         self.enemy_direction = 'left'
+        self.frame_count = 0
+
         self.Reset()
 
     def ActionCount(self):
@@ -182,6 +188,19 @@ class GameScene(object):
             )
             self.obstacle_group.add(obstacle)
 
+    def spawn_health_pack(self):
+        """
+        Spawn health packs randomly
+        """
+        self.health_pack_group.empty()
+        health_pack = HealthPack(
+            image=self.health_pack_image,
+            x=random.randrange(0, WIDTH - HEALTH_PACK_WIDTH, HEALTH_PACK_WIDTH // 3),
+            y=random.randrange(OBSTACLE_Y_MAX, HEIGHT, HEALTH_PACK_HEIGHT // 3)
+        )
+        self.health_pack_group.add(health_pack)
+
+
     def calculate_enemy_action(self):
         """
         Pre-scripted behavior of enemy
@@ -217,6 +236,10 @@ class GameScene(object):
         self.enemy.update(enemy_action, self.obstacle_group.sprites() + [self.player])
         self.enemy.bullets.update()
 
+        # Spawn health pack if time is reached
+        if self.frame_count == HEALTH_PACK_TIME_INTERVAL:
+            self.spawn_health_pack()
+
         # Check collisions:
         # 1) Player vs enemy bullets
         hit_list = pygame.sprite.spritecollide(self.player, self.enemy.bullets, True)
@@ -233,6 +256,11 @@ class GameScene(object):
         # 3) Bullets vs obstacles
         pygame.sprite.groupcollide(self.obstacle_group, self.player.bullets, False, True)
         pygame.sprite.groupcollide(self.obstacle_group, self.enemy.bullets, False, True)
+
+        # 4) Player vs health pack
+        hit_list = pygame.sprite.spritecollide(self.player, self.health_pack_group, True)
+        self.player.health += HEALTH_PACK_HEALTH_RECOVERED * len(hit_list)
+        self.reward += Reward.PLAYER_GET_HEALTH_PACK.value * len(hit_list)
 
         if NEGATIVE_REWARD_ENABLED:
             self.reward -= NEGATIVE_REWARD
@@ -256,10 +284,12 @@ class GameScene(object):
         self.enemy_group.draw(self.screen)
         self.enemy.bullets.draw(self.screen)
 
-        # Draw obstacles
+        # Draw obstacles and health packs
         self.obstacle_group.draw(self.screen)
+        self.health_pack_group.draw(self.screen)
 
         pygame.display.update()
+        self.frame_count += 1
 
     def draw_winner(self, text):
         draw_text = self.winner_font.render(text, True, WHITE_COLOR)
