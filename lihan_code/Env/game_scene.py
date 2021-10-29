@@ -296,24 +296,26 @@ class GameScene(object):
         self.reward += Reward.PLAYER_GET_HEALTH_PACK.value * len(hit_list)
 
         # 5) Player vs enemy ultimate
-        hit_list = pygame.sprite.spritecollide(self.player, self.enemy.ultimate_abilities, False,
-                                               pygame.sprite.collide_mask)
-        for hit in hit_list:
-            if isinstance(hit, UltimateAbility):
-                damage = hit.get_damage()
-                self.player.health -= damage
-                if damage > 0:
-                    self.reward += Reward.ULTIMATE_HIT_PLAYER.value
+        if not self.player.shield_activated:
+            hit_list = pygame.sprite.spritecollide(self.player, self.enemy.ultimate_abilities, False,
+                                                   pygame.sprite.collide_mask)
+            for hit in hit_list:
+                if isinstance(hit, UltimateAbility):
+                    damage = hit.get_damage()
+                    self.player.health -= damage
+                    if damage > 0:
+                        self.reward += Reward.ULTIMATE_HIT_PLAYER.value
 
         # 6) Enemy vs player ultimate
-        hit_list = pygame.sprite.spritecollide(self.enemy, self.player.ultimate_abilities, False,
-                                               pygame.sprite.collide_mask)
-        for hit in hit_list:
-            if isinstance(hit, UltimateAbility):
-                damage = hit.get_damage()
-                self.enemy.health -= damage
-                if damage > 0:
-                    self.reward += Reward.ULTIMATE_HIT_ENEMY.value
+        if not self.enemy.shield_activated:
+            hit_list = pygame.sprite.spritecollide(self.enemy, self.player.ultimate_abilities, False,
+                                                   pygame.sprite.collide_mask)
+            for hit in hit_list:
+                if isinstance(hit, UltimateAbility):
+                    damage = hit.get_damage()
+                    self.enemy.health -= damage
+                    if damage > 0:
+                        self.reward += Reward.ULTIMATE_HIT_ENEMY.value
 
         if NEGATIVE_REWARD_ENABLED:
             self.reward -= NEGATIVE_REWARD
