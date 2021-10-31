@@ -5,12 +5,13 @@ from typing import Tuple
 import pygame
 import numpy as np
 import sys
-sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
 from Env.constants import *
 from Env.health_pack import HealthPack
 from Env.obstacle import Obstacle
 from Env.spaceship import Spaceship
 from Env.ultimate_ability import UltimateAbility
+import torch
 
 
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -112,6 +113,8 @@ class GameScene(object):
 
         self.Reset()
 
+        self.replay_buffer = None
+
     # ------------------------- Env wrapper methods -------------------------
 
     def ActionCount(self):
@@ -184,6 +187,14 @@ class GameScene(object):
         self.update(player_action_num)
         self.draw_window()
         self.clock.tick(FPS)
+
+        # self.ScreenShot().shape = (800, 800, 3)
+        screen_shot = torch.tensor(self.ScreenShot()).cuda()
+        if self.replay_buffer is None:
+            self.replay_buffer = screen_shot.unsqueeze(dim=0)
+        else:
+            self.replay_buffer = torch.cat([self.replay_buffer, screen_shot.unsqueeze(dim=0)], dim=0)
+        # print(self.replay_buffer.shape)
 
         return False
 

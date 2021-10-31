@@ -37,7 +37,7 @@ TITLE = "AI bot"
 
 WIDTH = 800
 HEIGHT = 800
-FPS = 60
+FPS = 40
 VEL = 5
 ENEMY_COUNT = 1
 

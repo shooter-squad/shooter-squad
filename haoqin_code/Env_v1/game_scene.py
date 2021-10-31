@@ -2,7 +2,7 @@ import random
 import os
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/home/haoqindegcp/shooter-squad/haoqin_code')
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
 import pygame
 
 from Env.constants import *
