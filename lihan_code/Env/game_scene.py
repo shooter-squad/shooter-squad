@@ -192,10 +192,10 @@ class GameScene(object):
         """
         return np.array([
             self.player.health,
-            self.player.get_shield_availability(),
+            self.player.get_shield_cool_down(),
             int(self.player.ultimate_available),
             self.enemy.health,
-            self.enemy.get_shield_availability(),
+            self.enemy.get_shield_cool_down(),
             int(self.enemy.ultimate_available)
         ])
 
@@ -242,7 +242,7 @@ class GameScene(object):
         if self.enemy_direction == 'left':
             if self.enemy.rect.right >= WIDTH:
                 self.enemy_direction = 'right'
-        fire_or_shield = Action.FIRE if self.enemy.get_shield_availability() > 0 else Action.ACTIVATE_SHIELD
+        fire_or_shield = Action.FIRE if self.enemy.get_shield_cool_down() > 0 else Action.ACTIVATE_SHIELD
         left_or_right = Action.LEFT if self.enemy_direction == 'left' else Action.RIGHT
         if self.enemy.rect.y < 50:
             up_or_down = Action.UP if random.random() < 0.9 else Action.DOWN
