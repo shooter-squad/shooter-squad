@@ -186,18 +186,18 @@ class GameScene(object):
 
         return False
 
-    def AdditionalState(self) -> Tuple[int, int, int, int, int, int]:
+    def AdditionalState(self) -> np.ndarray:
         """
         Returns additional state parameters
         """
-        return (
+        return np.array([
             self.player.health,
             self.player.get_shield_availability(),
             int(self.player.ultimate_available),
             self.enemy.health,
             self.enemy.get_shield_availability(),
             int(self.enemy.ultimate_available)
-        )
+        ])
 
     def Exit(self):
         pygame.quit()

@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
+import sys
+sys.path.insert(0, r'../')
 from Env import *
 
 
@@ -124,7 +126,7 @@ class StackFrames(gym.ObservationWrapper):
         return np.array(self.stack).reshape(self.observation_space.low.shape)
 
     def get_info_stack(self):
-        return self.info_stack
+        return np.array(self.info_stack)
 
 def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
              no_ops=0, fire_first=False):
@@ -144,4 +146,21 @@ if __name__ == '__main__':
 
     env.reset()
 
-    env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    print(info)
+    info_stack = env.get_info_stack()
+    print(type(info_stack))
+    print(info_stack)
