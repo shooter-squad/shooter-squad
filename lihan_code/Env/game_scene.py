@@ -186,17 +186,17 @@ class GameScene(object):
 
         return False
 
-    def AdditionalState(self) -> Tuple[int, int, bool, int, int, bool]:
+    def AdditionalState(self) -> Tuple[int, int, int, int, int, int]:
         """
         Returns additional state parameters
         """
         return (
             self.player.health,
             self.player.get_shield_availability(),
-            self.player.ultimate_available,
+            int(self.player.ultimate_available),
             self.enemy.health,
             self.enemy.get_shield_availability(),
-            self.enemy.ultimate_available
+            int(self.enemy.ultimate_available)
         )
 
     def Exit(self):

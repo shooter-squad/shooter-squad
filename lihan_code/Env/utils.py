@@ -3,9 +3,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
-import sys
-# adding Folder_2 to the system path
-# sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
 from Env import *
 
 
@@ -106,6 +103,7 @@ class StackFrames(gym.ObservationWrapper):
                             env.observation_space.high.repeat(repeat, axis=0),
                             dtype=np.float32)
         self.stack = collections.deque(maxlen=repeat)
+        self.info_stack = collections.deque(maxlen=repeat)
 
     def reset(self):
         self.stack.clear()
@@ -113,16 +111,23 @@ class StackFrames(gym.ObservationWrapper):
         for _ in range(self.stack.maxlen):
             self.stack.append(observation)
 
+        self.info_stack.clear()
+        for _ in range(self.info_stack.maxlen):
+            self.info_stack.append(self.env.info)
+
         return np.array(self.stack).reshape(self.observation_space.low.shape)
 
     def observation(self, observation):
         self.stack.append(observation)
+        self.info_stack.append(self.env.info)
 
         return np.array(self.stack).reshape(self.observation_space.low.shape)
 
+    def get_info_stack(self):
+        return self.info_stack
+
 def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
              no_ops=0, fire_first=False):
-    env = None
     if env_name == 'shooter':
         env = ShooterEnv()
     else:
@@ -132,3 +137,11 @@ def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
     env = StackFrames(env, repeat)
 
     return env
+
+
+if __name__ == '__main__':
+    env = make_env('shooter')
+
+    env.reset()
+
+    env.step(1)

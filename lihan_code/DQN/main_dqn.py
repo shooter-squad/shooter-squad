@@ -1,7 +1,6 @@
 import gym
 import numpy as np
 from dqn_agent import DQNAgent
-from utils import plot_learning_curve, make_env
 from gym import wrappers
 import time
 import sys
