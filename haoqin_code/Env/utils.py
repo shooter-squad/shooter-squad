@@ -4,15 +4,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gym
 import sys
-# adding Folder_2 to the system path
-sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
+
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\Shooting2\shooter-squad\haoqin_code')
 from Env import *
 
 
+# ------------------------- Plotting methods -------------------------
+
+
 def plot_learning_curve(x, scores, epsilons, filename, lines=None):
-    fig=plt.figure()
-    ax=fig.add_subplot(111, label="1")
-    ax2=fig.add_subplot(111, label="2", frame_on=False)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, label="1")
+    ax2 = fig.add_subplot(111, label="2", frame_on=False)
 
     ax.plot(x, epsilons, color="C0")
     ax.set_xlabel("Training Steps", color="C0")
@@ -23,7 +26,7 @@ def plot_learning_curve(x, scores, epsilons, filename, lines=None):
     N = len(scores)
     running_avg = np.empty(N)
     for t in range(N):
-	    running_avg[t] = np.mean(scores[max(0, t-20):(t+1)])
+        running_avg[t] = np.mean(scores[max(0, t - 20):(t + 1)])
 
     ax2.scatter(x, running_avg, color="C1")
     ax2.axes.get_xaxis().set_visible(False)
@@ -38,9 +41,12 @@ def plot_learning_curve(x, scores, epsilons, filename, lines=None):
 
     plt.savefig(filename)
 
+
+# ------------------------- Env wrapper methods -------------------------
+
+
 class RepeatActionAndMaxFrame(gym.Wrapper):
-    def __init__(self, env=None, repeat=4, clip_reward=False, no_ops=0,
-                 fire_first=False):
+    def __init__(self, env=None, repeat=4, clip_reward=False, no_ops=0, fire_first=False):
         super(RepeatActionAndMaxFrame, self).__init__(env)
         self.repeat = repeat
         self.shape = env.observation_space.low.shape
@@ -67,7 +73,7 @@ class RepeatActionAndMaxFrame(gym.Wrapper):
 
     def reset(self):
         obs = self.env.reset()
-        no_ops = np.random.randint(self.no_ops)+1 if self.no_ops > 0 else 0
+        no_ops = np.random.randint(self.no_ops) + 1 if self.no_ops > 0 else 0
         for _ in range(no_ops):
             _, _, done, _ = self.env.step(0)
             if done:
@@ -76,36 +82,35 @@ class RepeatActionAndMaxFrame(gym.Wrapper):
             assert self.env.unwrapped.get_action_meanings()[1] == 'FIRE'
             obs, _, _, _ = self.env.step(1)
 
-        self.frame_buffer = np.zeros_like((2,self.shape))
+        self.frame_buffer = np.zeros_like((2, self.shape))
         self.frame_buffer[0] = obs
 
         return obs
+
 
 class PreprocessFrame(gym.ObservationWrapper):
     def __init__(self, shape, env=None):
         super(PreprocessFrame, self).__init__(env)
         self.shape = (shape[2], shape[0], shape[1])
-        self.observation_space = gym.spaces.Box(low=0.0, high=1.0,
-                                    shape=self.shape, dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=self.shape, dtype=np.float32)
 
     def observation(self, obs):
         new_frame = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
         # new_frame = obs
-        resized_screen = cv2.resize(new_frame, self.shape[1:],
-                                    interpolation=cv2.INTER_AREA)
+        resized_screen = cv2.resize(new_frame, self.shape[1:], interpolation=cv2.INTER_AREA)
         new_obs = np.array(resized_screen, dtype=np.uint8).reshape(self.shape)
-        new_obs = new_obs / 255.0   
+        new_obs = new_obs / 255.0
 
         return new_obs
+
 
 class StackFrames(gym.ObservationWrapper):
     def __init__(self, env, repeat):
         super(StackFrames, self).__init__(env)
-        self.observation_space = gym.spaces.Box(
-                            env.observation_space.low.repeat(repeat, axis=0),
-                            env.observation_space.high.repeat(repeat, axis=0),
-                            dtype=np.float32)
+        self.observation_space = gym.spaces.Box(env.observation_space.low.repeat(repeat, axis=0),
+                                                env.observation_space.high.repeat(repeat, axis=0), dtype=np.float32)
         self.stack = collections.deque(maxlen=repeat)
+        self.info_stack = collections.deque(maxlen=repeat)
 
     def reset(self):
         self.stack.clear()
@@ -113,15 +118,23 @@ class StackFrames(gym.ObservationWrapper):
         for _ in range(self.stack.maxlen):
             self.stack.append(observation)
 
+        self.info_stack.clear()
+        for _ in range(self.info_stack.maxlen):
+            self.info_stack.append(self.env.info)
+
         return np.array(self.stack).reshape(self.observation_space.low.shape)
 
     def observation(self, observation):
         self.stack.append(observation)
+        self.info_stack.append(self.env.info)
 
         return np.array(self.stack).reshape(self.observation_space.low.shape)
 
-def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
-             no_ops=0, fire_first=False):
+    def get_info_stack(self):
+        return np.array(self.info_stack)
+
+
+def make_env(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False, no_ops=0, fire_first=False):
     if env_name == 'shooter':
         env = ShooterEnv()
     else:
@@ -131,3 +144,28 @@ def make_env(env_name, shape=(84,84,1), repeat=4, clip_rewards=False,
     env = StackFrames(env, repeat)
 
     return env
+
+
+if __name__ == '__main__':
+    env = make_env('shooter')
+
+    env.reset()
+
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    state, reward, done, info = env.step(1)
+    print(info)
+    info_stack = env.get_info_stack()
+    print(type(info_stack))
+    print(info_stack)

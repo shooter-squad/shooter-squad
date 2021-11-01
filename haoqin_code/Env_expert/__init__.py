@@ -6,4 +6,3 @@ from .shooter_env import *
 from .obstacle import *
 from .health_pack import *
 from .ultimate_ability import *
-from .utils import *

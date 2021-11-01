@@ -6,7 +6,7 @@ import torch.optim as optim
 import numpy as np
 
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, info_stack_dims=(4, 6)):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
@@ -15,7 +15,7 @@ class DeepQNetwork(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
         self.conv3 = nn.Conv2d(64, 64, 3, stride=1)
 
-        fc_input_dims = self.calculate_conv_output_dims(input_dims)
+        fc_input_dims = self.calculate_conv_output_dims(input_dims) + info_stack_dims[0] * info_stack_dims[1]
         # print(fc_input_dims)
 
         self.fc1 = nn.Linear(fc_input_dims, 512)
@@ -35,7 +35,7 @@ class DeepQNetwork(nn.Module):
         dims = self.conv3(dims)
         return int(np.prod(dims.size()))
 
-    def forward(self, state):
+    def forward(self, state, info_stack):
         # * N=batch_size=64, C_in=input_channel=4, H=84, W=84
         print('ENTERING FORWARD')
         print('state.shape: ', state.shape)
@@ -48,8 +48,14 @@ class DeepQNetwork(nn.Module):
         # conv3 shape is BS x n_filters x H x W
         conv_state = conv3.view(conv3.size()[0], -1)
         print('conv_state.shape: ', conv_state.shape)
+        # * flatten info_stack
+        info_stack_flatten = info_stack.view(info_stack.size()[0], -1)
+        print('info_stack_flatten.shape: ', conv_state.shape)
+        flatten_cat = T.cat([conv_state, info_stack_flatten], dim=1)
+        
+        print('flatten_cat.shape: ', flatten_cat.shape)
         # conv_state shape is BS x (n_filters * H * W)
-        flat1 = F.relu(self.fc1(conv_state))
+        flat1 = F.relu(self.fc1(flatten_cat))
         print('flat1.shape: ', flat1.shape)
         actions = self.fc2(flat1) # // NOTE: actions: [32, 6]
         print('actions.shape: ', actions.shape)

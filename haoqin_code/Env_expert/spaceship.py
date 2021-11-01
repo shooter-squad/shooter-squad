@@ -105,7 +105,7 @@ class Spaceship(pygame.sprite.Sprite):
         )
         self.time_since_last_bullet = 0
 
-    def get_shield_cool_down(self) -> int:
+    def get_shield_availability(self) -> int:
         return max(0, SHIELD_COOL_DOWN - self.time_since_shield_activated)
 
     def activate_shield(self):

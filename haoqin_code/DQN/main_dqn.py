@@ -1,13 +1,16 @@
 import gym
 import numpy as np
 from dqn_agent import DQNAgent
-from utils import plot_learning_curve, make_env
+import sys
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\Shooting2\shooter-squad\haoqin_code')
+
 from gym import wrappers
 import time
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'C:\Users\Nathan\Documents\GitHub\shooter-squad\haoqin_code')
+
 from Env import *
+# from utils import plot_learning_curve, make_env
 
 
 if __name__ == '__main__':
@@ -18,7 +21,7 @@ if __name__ == '__main__':
     load_checkpoint = False
     n_games = 3000
     print('env obervation space shape is ', env.observation_space.shape)
-    agent = DQNAgent(gamma=0.99, epsilon=0, lr=0.0001,
+    agent = DQNAgent(gamma=0.99, epsilon=1, lr=0.0001,
                      input_dims=(env.observation_space.shape),
                      n_actions=env.action_space.n, mem_size=30000, eps_min=0.1,
                      batch_size=64, replace=1000, eps_dec=1e-5,
@@ -46,12 +49,14 @@ if __name__ == '__main__':
     for i in range(n_games):
         done = False
         observation = env.reset()
-
+        info_stack = env.get_info_stack()
         score = 0
         while not done:
             # // NOTE: whenever the agent makes a move, he enters a new state. it store the observation, action, reward, obseravation_, done in his memory for REPLAY, which has size of 40000.
             print('ENTERING THE GAME')
-            action = agent.choose_action(observation) # * action shape is scalar (e.g. 3)
+            
+            action = agent.choose_action(observation, info_stack) # * action shape is scalar (e.g. 3)
+            print('observation shape ', observation.shape)
             # print('action shape is: ', action)
             # print('in one iteration')
             
@@ -64,17 +69,21 @@ if __name__ == '__main__':
             #     print('None')
             # fire_file.close()
             
-            observation_, reward, done, info = env.step(action) # * observation shape is (4, 84, 84), reward = scalar, all variables are unbatched
+            observation_, reward, done, info = env.step(action) # * observation shape is (4, 84, 84), reward = scalar, all variables are unbatched, info-stack: (4, 6)
+            info_stack_ = env.get_info_stack()
+            print('INFO_STACK')
+            print(info_stack)
             print('action shape: ', action, 'obseravation shape', observation.shape)
             time_prev = time.time()
             score += reward
 
             if not load_checkpoint:
                 agent.store_transition(observation, action,
-                                     reward, observation_, done)
+                                     reward, observation_, done, info_stack, info_stack_)
                 
                 agent.learn()
             observation = observation_
+            info_stack = info_stack_
             n_steps += 1
             time_curr = time.time()
 

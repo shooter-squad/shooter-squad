@@ -4,12 +4,14 @@ from typing import Tuple
 
 import pygame
 import numpy as np
-
+import sys
+sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\shooter-squad\haoqin_code')
 from Env.constants import *
 from Env.health_pack import HealthPack
 from Env.obstacle import Obstacle
 from Env.spaceship import Spaceship
 from Env.ultimate_ability import UltimateAbility
+import torch
 
 
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -111,6 +113,8 @@ class GameScene(object):
 
         self.Reset()
 
+        self.replay_buffer = None
+
     # ------------------------- Env wrapper methods -------------------------
 
     def ActionCount(self):
@@ -184,20 +188,28 @@ class GameScene(object):
         self.draw_window()
         self.clock.tick(FPS)
 
+        # self.ScreenShot().shape = (800, 800, 3)
+        screen_shot = torch.tensor(self.ScreenShot()).cuda()
+        if self.replay_buffer is None:
+            self.replay_buffer = screen_shot.unsqueeze(dim=0)
+        else:
+            self.replay_buffer = torch.cat([self.replay_buffer, screen_shot.unsqueeze(dim=0)], dim=0)
+        # print(self.replay_buffer.shape)
+
         return False
 
-    def AdditionalState(self) -> np.ndarray:
+    def AdditionalState(self) -> Tuple[int, int, bool, int, int, bool]:
         """
         Returns additional state parameters
         """
-        return np.array([
+        return (
             self.player.health,
-            self.player.get_shield_cool_down(),
-            int(self.player.ultimate_available),
+            self.player.get_shield_availability(),
+            self.player.ultimate_available,
             self.enemy.health,
-            self.enemy.get_shield_cool_down(),
-            int(self.enemy.ultimate_available)
-        ])
+            self.enemy.get_shield_availability(),
+            self.enemy.ultimate_available
+        )
 
     def Exit(self):
         pygame.quit()
@@ -242,7 +254,7 @@ class GameScene(object):
         if self.enemy_direction == 'left':
             if self.enemy.rect.right >= WIDTH:
                 self.enemy_direction = 'right'
-        fire_or_shield = Action.FIRE if self.enemy.get_shield_cool_down() >= 0 else Action.ACTIVATE_SHIELD
+        fire_or_shield = Action.FIRE if self.enemy.get_shield_availability() >= 0 else Action.ACTIVATE_SHIELD
         left_or_right = Action.LEFT if self.enemy_direction == 'left' else Action.RIGHT
         if self.enemy.rect.y < 50:
             up_or_down = Action.UP if random.random() < 0.9 else Action.DOWN

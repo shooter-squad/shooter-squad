@@ -34,24 +34,25 @@ class DQNAgent(object):
                                     name=self.env_name+'_'+self.algo+'_q_next',
                                     chkpt_dir=self.chkpt_dir)
 
-    def choose_action(self, observation): # intially very exploratory, later becomes greedy
+    def choose_action(self, observation, info_stack): # intially very exploratory, later becomes greedy
         print('Agent choose action')
         if np.random.random() > self.epsilon:
-            state = T.tensor([observation],dtype=T.float).to(self.q_eval.device) # NOTE: state: [1, 84, 84]
+            state = T.tensor([observation],dtype=T.float).to(self.q_eval.device) # NOTE: state: [1, 4, 84, 84]
+            info_stack = T.tensor([info_stack]).to(self.q_eval.device) # NOTE: info_stack: [1, 4, 6]
             print('q_eval forward in choose action')
             print('state shape is: ', state.shape)
-            actions = self.q_eval.forward(state)
+            actions = self.q_eval.forward(state, info_stack)
             action = T.argmax(actions).item()
         else:
             action = np.random.choice(self.action_space)
 
         return action
 
-    def store_transition(self, state, action, reward, state_, done):
-        self.memory.store_transition(state, action, reward, state_, done)
+    def store_transition(self, state, action, reward, state_, done, info_stack, info_stack_):
+        self.memory.store_transition(state, action, reward, state_, done, info_stack, info_stack_)
 
     def sample_memory(self):
-        state, action, reward, new_state, done = \
+        state, action, reward, new_state, done, info_stack, info_stack_ = \
                                 self.memory.sample_buffer(self.batch_size)
 
         states = T.tensor(state).to(self.q_eval.device)
@@ -59,8 +60,10 @@ class DQNAgent(object):
         dones = T.tensor(done).to(self.q_eval.device)
         actions = T.tensor(action).to(self.q_eval.device)
         states_ = T.tensor(new_state).to(self.q_eval.device)
+        info_stack = T.tensor(info_stack).to(self.q_eval.device)
+        info_stack_ = T.tensor(info_stack_).to(self.q_eval.device)
 
-        return states, actions, rewards, states_, dones
+        return states, actions, rewards, states_, dones, info_stack, info_stack_
 
     def replace_target_network(self): # // copy eval network to target_network for every 1000 steps
         if self.learn_step_counter % self.replace_target_cnt == 0:
@@ -87,15 +90,15 @@ class DQNAgent(object):
 
         self.replace_target_network()
 
-        states, actions, rewards, states_, dones = self.sample_memory() # *: state: [32, 4, 84, 84]; actions: [32]; dones: [32]; rewards:[32]
+        states, actions, rewards, states_, dones, info_stack, info_stack_ = self.sample_memory() # *: state: [32, 4, 84, 84]; actions: [32]; dones: [32]; rewards:[32]
         # print('In agent.learn(): ', states.shape, actions.shape)
         indices = np.arange(self.batch_size)
 
         # temporal difference learning
         print('q_eval forward in learn')
-        q_pred = self.q_eval.forward(states)[indices, actions]
+        q_pred = self.q_eval.forward(states, info_stack)[indices, actions]
         print('q_next forward in learn')
-        q_next = self.q_next.forward(states_).max(dim=1)[0]
+        q_next = self.q_next.forward(states_, info_stack_).max(dim=1)[0]
 
         q_next[dones] = 0.0
         q_target = rewards + self.gamma*q_next
