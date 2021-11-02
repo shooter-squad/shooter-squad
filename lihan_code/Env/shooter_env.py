@@ -52,8 +52,7 @@ if __name__ == '__main__':
     ]
 
     for action in action_list:
-        state, reward, done, info, additional = env.step(action)
-        print(reward, additional)
+        state, reward, done, info = env.step(action)
         env.step(action)
         env.step(action)
         env.step(action)

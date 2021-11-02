@@ -1,10 +1,21 @@
 from typing import List, Tuple
+from enum import Enum
 
 import pygame
 
 from Env.bullet import Bullet
 from Env.ultimate_ability import UltimateAbility
+from Env.obstacle import Obstacle
 from Env.constants import *
+
+
+class SpaceshipType(Enum):
+    """
+    All enemy types in the game.
+    """
+    NORMAL_ENEMY = 0
+    CHARGE_ENEMY = 1
+    PLAYER = 2
 
 
 class Spaceship(pygame.sprite.Sprite):
@@ -14,7 +25,7 @@ class Spaceship(pygame.sprite.Sprite):
 
     def __init__(self, image: pygame.Surface, shielded_image: pygame.Surface, ultimate_ability_image: pygame.Surface,
                  screen_rect: pygame.Rect, start_health: int, start_x: int, start_y: int, color: Tuple[int, int, int],
-                 up_direction: bool):
+                 up_direction: bool, is_player: bool, type: SpaceshipType = SpaceshipType.NORMAL_ENEMY):
         super().__init__()
 
         if PURE_COLOR_DISPLAY:
@@ -27,6 +38,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.shielded_image = shielded_image
 
         self.rect = self.image.get_rect()
+        self.rect.x = start_x
+        self.rect.y = start_y
         self.screen_rect = screen_rect
         self.health = start_health
         self.start_health = start_health
@@ -34,16 +47,21 @@ class Spaceship(pygame.sprite.Sprite):
         self.start_y = start_y
         self.color = color
         self.up_direction = up_direction
+        self.type = type
 
         self.bullets = pygame.sprite.Group()
-        self.time_since_last_bullet = BULLET_INTERVAL
+        self.bullet_interval = PLAYER_BULLET_INTERVAL if is_player else ENEMY_BULLET_INTERVAL
+        self.time_since_last_bullet = self.bullet_interval
 
         self.shield_activated = False
         self.time_since_shield_activated = SHIELD_COOL_DOWN
+        self.shield_enabled = ENEMY_SHIELD_ENABLED or is_player
 
         self.ultimate_ability_image = ultimate_ability_image
         self.ultimate_abilities = pygame.sprite.Group()
         self.ultimate_available = True
+
+        self.enemy_behavior = Action.NOOP  # Only used for enemies
 
     def update(self, action: Action, others: List[pygame.sprite.Sprite]):
         # Update counters
@@ -76,21 +94,28 @@ class Spaceship(pygame.sprite.Sprite):
             if action in [Action.LEFT, Action.RIGHT]:
                 self.rect.x += vel
                 for other in others:
+                    if self.type == SpaceshipType.CHARGE_ENEMY and isinstance(other, Obstacle):
+                        continue
                     if pygame.sprite.collide_rect(other, self):
                         self.rect.x -= vel
                         break
             elif action in [Action.UP, Action.DOWN]:
                 self.rect.y += vel
                 for other in others:
+                    if self.type == SpaceshipType.CHARGE_ENEMY and isinstance(other, Obstacle):
+                        continue
                     if pygame.sprite.collide_rect(other, self):
                         self.rect.y -= vel
                         break
+
+        if self.health <= 0:
+            self.kill()
 
         # Keep sprite on screen
         self.rect.clamp_ip(self.screen_rect)
 
     def fire(self):
-        if self.time_since_last_bullet < BULLET_INTERVAL:
+        if self.time_since_last_bullet < self.bullet_interval:
             return
 
         self.bullets.add(
@@ -109,7 +134,7 @@ class Spaceship(pygame.sprite.Sprite):
         return max(0, SHIELD_COOL_DOWN - self.time_since_shield_activated)
 
     def activate_shield(self):
-        if self.time_since_shield_activated < SHIELD_COOL_DOWN:
+        if not self.shield_enabled or self.time_since_shield_activated < SHIELD_COOL_DOWN:
             return
 
         old_x = self.rect.centerx
@@ -124,6 +149,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.time_since_shield_activated = 0
 
     def deactivate_shield(self):
+        if not self.shield_enabled:
+            return
         old_x = self.rect.centerx
         old_y = self.rect.centery
 
@@ -151,13 +178,15 @@ class Spaceship(pygame.sprite.Sprite):
         self.health = self.start_health
 
         self.bullets.empty()
-        self.time_since_last_bullet = BULLET_INTERVAL
+        self.time_since_last_bullet = self.bullet_interval
 
         self.deactivate_shield()
         self.time_since_shield_activated = SHIELD_COOL_DOWN
 
         self.ultimate_abilities.empty()
         self.ultimate_available = True
+
+        self.enemy_behavior = Action.NOOP
 
     def is_dead(self) -> bool:
         return self.health <= 0
