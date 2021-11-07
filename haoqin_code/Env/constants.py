@@ -39,20 +39,27 @@ WIDTH = 800
 HEIGHT = 800
 FPS = 60
 VEL = 5
-ENEMY_COUNT = 1
 
-BULLET_WIDTH = 10
-BULLET_HEIGHT = 15
+ENEMY_COUNT = 3
+NORMAL_ENEMY_COUNT = 2
+CHARGE_ENEMY_COUNT = 1
+WIN_COUNT = 2
+ENEMY_START_Y_RANGES = [[0, 100], [130, 220]]
+CHARGE_ENEMY_SPAWN_INTERVAL = 600
+
+BULLET_WIDTH = 16
+BULLET_HEIGHT = 24
 BULLET_VEL = 10
 MAX_BULLETS = 3
 BULLET_DAMAGE = 1
-BULLET_INTERVAL = 20
+ENEMY_BULLET_INTERVAL = 40
+PLAYER_BULLET_INTERVAL = 20
 
 SPACESHIP_WIDTH = 60
 SPACESHIP_HEIGHT = 72
 SHIELD_WIDTH = 118
 SHIELD_HEIGHT = 114
-RED_START_HEALTH = 10
+RED_START_HEALTH = 4
 YELLOW_START_HEALTH = 10
 
 RED_START_POSITION = (375, 80)
@@ -60,6 +67,7 @@ YELLOW_START_POSITION = (375, 650)
 
 SHIELD_DURATION = 60
 SHIELD_COOL_DOWN = 120  # Time since last time shield was activated
+ENEMY_SHIELD_ENABLED = False
 
 OBSTACLE_COUNT = 2
 OBSTACLE_WIDTH = 100
@@ -79,12 +87,16 @@ ULTIMATE_ABILITY_DAMAGE_INTERVAL = 10
 
 YELLOW_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_yellow.png')
 RED_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_red.png')
+BLUE_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_blue.png')
+GREEN_SPACESHIP_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_green.png')
 YELLOW_SPACESHIP_SHIELDED_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_yellow_shielded.png')
 RED_SPACESHIP_SHIELDED_IMAGE_PATH = os.path.join('../../Assets', 'spaceship_red_shielded.png')
 HEALTH_PACK_IMAGE_PATH = os.path.join('../../Assets', 'health_pack.png')
 OBSTACLE_IMAGE_PATH = os.path.join('../../Assets', 'obstacle.png')
 YELLOW_ULTIMATE_ABILITY_IMAGE_PATH = os.path.join('../../Assets', 'yellow_ultimate_ability.png')
 RED_ULTIMATE_ABILITY_IMAGE_PATH = os.path.join('../../Assets', 'red_ultimate_ability.png')
+BLUE_ULTIMATE_ABILITY_IMAGE_PATH = os.path.join('../../Assets', 'blue_ultimate_ability.png')
+GREEN_ULTIMATE_ABILITY_IMAGE_PATH = os.path.join('../../Assets', 'green_ultimate_ability.png')
 SPACE_IMAGE_PATH = os.path.join('../../Assets', 'space.png')
 HIT_SOUND_PATH = os.path.join('../../Assets', "Grenade+1.mp3")
 FIRE_SOUND_PATH = os.path.join('../../Assets', "Gun+Silencer.mp3")
@@ -93,7 +105,8 @@ FIRE_SOUND_PATH = os.path.join('../../Assets', "Gun+Silencer.mp3")
 WHITE_COLOR = (255, 255, 255)
 RED_COLOR = (255, 0, 0)
 YELLOW_COLOR = (255, 255, 0)
+BLUE_COLOR = (0, 162, 232)
 
 # ------------------------- Fonts -------------------------
-HEALTH_FONT = ('comicsans', 40)
+HEALTH_FONT = ('comicsans', 20)
 WINNER_FONT = ('comicsans', 100)

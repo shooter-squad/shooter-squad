@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 import gym
 import sys
 
-sys.path.insert(0, r'C:\Users\haoqi\OneDrive\Desktop\Shooting2\shooter-squad\haoqin_code')
+sys.path.insert(0, r'../../')
+from haoqin_code.Env import shooter_env
+
+sys.path.insert(0, r'../')
 from Env import *
 
 
