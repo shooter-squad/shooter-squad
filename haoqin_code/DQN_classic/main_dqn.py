@@ -7,7 +7,7 @@ import time
 import sys
 # adding Folder_2 to the system path
 sys.path.insert(0, r'../')
-from Env import *
+from Env_classic import *
 
 
 if __name__ == '__main__':

@@ -2,11 +2,11 @@ import random
 import os
 import sys
 # adding Folder_2 to the system path
-sys.path.insert(0, r'/home/haoqindegcp/shooter-squad/haoqin_code')
+sys.path.insert(0, r'../')
 import pygame
 
-from Env.constants import *
-from Env.spaceship import Spaceship
+from Env_classic.constants import *
+from Env_classic.spaceship import Spaceship
 
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
 
