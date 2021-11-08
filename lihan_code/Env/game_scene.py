@@ -142,8 +142,11 @@ class GameScene(object):
         self.player.reset()
         for enemy in self.enemy_group.sprites():
             if isinstance(enemy, Spaceship):
-                enemy.reset()
-                enemy.enemy_behavior = Action.LEFT if random.random() < 0.5 else Action.RIGHT
+                if enemy.type == SpaceshipType.NORMAL_ENEMY:
+                    enemy.reset()
+                    enemy.enemy_behavior = Action.LEFT if random.random() < 0.5 else Action.RIGHT
+                else:
+                    enemy.kill()
         self.spawn_obstacles()
         self.health_pack_group.empty()
 
@@ -183,7 +186,13 @@ class GameScene(object):
 
         # Check if game is over
         winner_text = ""
-        if len(self.enemy_group) == 0:
+        all_enemies_dead = True
+        for enemy in self.enemy_group.sprites():
+            if isinstance(enemy, Spaceship) and not enemy.is_dead():
+                all_enemies_dead = False
+                break
+
+        if all_enemies_dead:
             winner_text = "Yellow Wins!"
         elif self.player.is_dead():
             winner_text = "Red Wins!"
@@ -250,9 +259,12 @@ class GameScene(object):
         """
         self.obstacle_group.empty()
         for i in range(OBSTACLE_COUNT):
+            spawn_left = True if random.random() < 0.5 else False
             obstacle = Obstacle(
                 image=self.obstacle_image,
-                x=random.randrange(0, WIDTH - OBSTACLE_WIDTH, OBSTACLE_WIDTH // 3),
+                x=random.randrange(0 if spawn_left else WIDTH // 2 + SPACESHIP_WIDTH,
+                                   WIDTH // 2 - OBSTACLE_WIDTH - SPACESHIP_WIDTH if spawn_left else WIDTH - OBSTACLE_WIDTH,
+                                   OBSTACLE_WIDTH // 3),
                 y=random.randrange(OBSTACLE_Y_MIN, OBSTACLE_Y_MAX, OBSTACLE_HEIGHT // 3)
             )
             self.obstacle_group.add(obstacle)
@@ -303,9 +315,9 @@ class GameScene(object):
             if enemy.rect.right >= WIDTH:
                 enemy.enemy_behavior = Action.RIGHT
         fire_or_shield = Action.ACTIVATE_SHIELD if enemy.shield_enabled and enemy.get_shield_cool_down() == 0 else Action.FIRE
-        if enemy.enemy_behavior == Action.UP:
+        if enemy.type == SpaceshipType.CHARGE_ENEMY or enemy.enemy_behavior == Action.UP:
             if enemy.rect.bottom >= HEIGHT:
-                enemy.kill()
+                enemy.health = 0  # soft kill
             movement = Action.UP
         else:
             left_or_right = Action.LEFT if enemy.enemy_behavior == Action.LEFT else Action.RIGHT
@@ -331,8 +343,9 @@ class GameScene(object):
         i = 0
         for enemy in self.enemy_group.sprites():
             if isinstance(enemy, Spaceship):
-                enemy_action = self.calculate_enemy_action(enemy, i)
-                enemy.update(enemy_action, self.obstacle_group.sprites() + [self.player])
+                if not enemy.is_dead():
+                    enemy_action = self.calculate_enemy_action(enemy, i)
+                    enemy.update(enemy_action, self.obstacle_group.sprites() + [self.player])
                 enemy.bullets.update()
                 enemy.ultimate_abilities.update()
             i += 1
@@ -355,10 +368,11 @@ class GameScene(object):
                     self.reward += Reward.BULLET_HIT_PLAYER.value * len(hit_list)
 
                 # 2) Enemy vs player bullets
-                hit_list = pygame.sprite.spritecollide(enemy, self.player.bullets, True)
-                if not enemy.shield_activated:
-                    enemy.health -= BULLET_DAMAGE * len(hit_list)
-                    self.reward += Reward.BULLET_HIT_ENEMY.value * len(hit_list)
+                if not enemy.is_dead():
+                    hit_list = pygame.sprite.spritecollide(enemy, self.player.bullets, True)
+                    if not enemy.shield_activated:
+                        enemy.health -= BULLET_DAMAGE * len(hit_list)
+                        self.reward += Reward.BULLET_HIT_ENEMY.value * len(hit_list)
 
                 # 3) Bullets vs obstacles
                 pygame.sprite.groupcollide(self.obstacle_group, enemy.bullets, False, True)
@@ -375,7 +389,7 @@ class GameScene(object):
                                 self.reward += Reward.ULTIMATE_HIT_PLAYER.value
 
                 # 6) Enemy vs player ultimate
-                if not enemy.shield_activated:
+                if not enemy.is_dead() and not enemy.shield_activated:
                     hit_list = pygame.sprite.spritecollide(enemy, self.player.ultimate_abilities, False,
                                                            pygame.sprite.collide_mask)
                     for hit in hit_list:
@@ -384,6 +398,13 @@ class GameScene(object):
                             enemy.health -= damage
                             if damage > 0:
                                 self.reward += Reward.ULTIMATE_HIT_ENEMY.value
+
+                # 7) Charge enemy vs player
+                if enemy.type == SpaceshipType.CHARGE_ENEMY and \
+                        not enemy.is_dead() and \
+                        pygame.sprite.collide_rect(enemy, self.player):
+                    self.player.health = 0
+                    self.reward += Reward.PLAYER_HIT_CHARGE_ENEMY.value
 
         # 3) Bullets vs obstacles
         pygame.sprite.groupcollide(self.obstacle_group, self.player.bullets, False, True)
@@ -411,8 +432,10 @@ class GameScene(object):
             if isinstance(enemy, Spaceship):
                 enemy.ultimate_abilities.draw(self.screen)
                 enemy.bullets.draw(self.screen)
+                if not enemy.is_dead():
+                    enemy.draw(self.screen)
 
-        self.enemy_group.draw(self.screen)
+        # self.enemy_group.draw(self.screen)
 
         # Draw obstacles and health packs
         self.obstacle_group.draw(self.screen)

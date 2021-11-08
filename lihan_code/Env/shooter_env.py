@@ -40,6 +40,7 @@ class ShooterEnv(Env):
     def reset(self):
         self.game_scene.Reset()
         self.state = self.game_scene.ScreenShot()
+        self.done = self.game_scene.Done()
         self.info = self.game_scene.AdditionalState()
         return self.state
 
@@ -51,7 +52,8 @@ if __name__ == '__main__':
         0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7
     ]
 
-    done = False
-    while not done:
+    while True:
         state, reward, done, info = env.step(-1)
+        if done:
+            env.reset()
         print(env.info)
