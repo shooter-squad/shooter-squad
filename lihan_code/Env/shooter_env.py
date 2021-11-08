@@ -51,9 +51,7 @@ if __name__ == '__main__':
         0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7
     ]
 
-    for action in action_list:
-        state, reward, done, info = env.step(action)
-        env.step(action)
-        env.step(action)
-        env.step(action)
-        env.step(action)
+    done = False
+    while not done:
+        state, reward, done, info = env.step(-1)
+        print(env.info)

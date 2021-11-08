@@ -204,19 +204,40 @@ class GameScene(object):
         """
         Returns additional state parameters
         """
-        res = [
+        player_arr = np.zeros(ADDITIONAL_STATE_LEN_PLAYER, dtype=np.int64)
+        normal_arr = np.zeros(ADDITIONAL_STATE_LEN_NORMAL, dtype=np.int64)
+        charge_arr = np.zeros(ADDITIONAL_STATE_LEN_CHARGE, dtype=np.int64)
+
+        player_temp = np.array([
             self.player.health,
             self.player.get_shield_cool_down(),
             int(self.player.ultimate_available)
-        ]
+        ])
+        player_arr[0:player_temp.shape[0]] = player_temp
+
+        normal_temp = []
+        charge_temp = []
         for enemy in self.enemy_group.sprites():
-            if isinstance(enemy, Spaceship):
-                res += [
+            if isinstance(enemy, Spaceship) and enemy.type == SpaceshipType.NORMAL_ENEMY:
+                normal_temp += [
                     enemy.health,
                     enemy.get_shield_cool_down(),
                     int(enemy.ultimate_available)
                 ]
-        return np.array(res)
+            elif isinstance(enemy, Spaceship) and enemy.type == SpaceshipType.CHARGE_ENEMY:
+                charge_temp += [
+                    enemy.health,
+                    enemy.get_shield_cool_down(),
+                    int(enemy.ultimate_available)
+                ]
+
+        normal_temp = np.array(normal_temp)
+        charge_temp = np.array(charge_temp)
+
+        normal_arr[0:normal_temp.shape[0]] = normal_temp
+        charge_arr[0:charge_temp.shape[0]] = charge_temp
+
+        return np.concatenate((player_arr, normal_arr, charge_arr), axis=None)
 
     def Exit(self):
         pygame.quit()
@@ -437,5 +458,8 @@ if __name__ == "__main__":
 
     while not game.Done():
         game.Play(-1)
+        print(game.AdditionalState())
+        if len(game.AdditionalState().shape) < 1:
+            print("Warn: " + str(game.AdditionalState().shape))
 
     game.Exit()
