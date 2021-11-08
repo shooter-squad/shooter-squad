@@ -96,6 +96,7 @@ if __name__ == '__main__':
             info_stack = info_stack_
             n_steps += 1
             time_curr = time.time()
+            print('DONE: ', done)
 
         scores.append(score)
         steps_array.append(n_steps)
