@@ -6,7 +6,7 @@ import torch.optim as optim
 import numpy as np
 
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, info_stack_dims=(4, 6)):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, info_stack_dims=(4, 15)):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
@@ -68,4 +68,8 @@ class DeepQNetwork(nn.Module):
 
     def load_checkpoint(self):
         print('... loading checkpoint ...')
+        self.load_state_dict(T.load(self.checkpoint_file))
+
+    def PreTrain(self):
+        print('... loading pre_train model ...')
         self.load_state_dict(T.load(self.checkpoint_file))

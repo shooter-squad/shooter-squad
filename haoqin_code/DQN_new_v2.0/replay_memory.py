@@ -1,7 +1,7 @@
 import numpy as np
 
 class ReplayBuffer(object):
-    def __init__(self, max_size, input_shape, n_actions, info_stack_shape=(4, 6)):
+    def __init__(self, max_size, input_shape, n_actions, info_stack_shape=(4, 15)):
         self.mem_size = max_size
         self.mem_cntr = 0
         self.state_memory = np.zeros((self.mem_size, *input_shape),
@@ -24,8 +24,16 @@ class ReplayBuffer(object):
         self.action_memory[index] = action
         self.reward_memory[index] = reward
         self.terminal_memory[index] = done
-        self.info_stack_memory[index] = info_stack
-        self.new_info_stack_memory[index] = info_stack_
+
+        info_stack_shape = info_stack.shape
+        info_stack_shape_ = info_stack_.shape
+
+        print('INFO_STACK SHAPE: ', info_stack_shape)
+        print('INFO_STACK SHAPE_: ', info_stack_shape_)
+
+
+        self.info_stack_memory[index][0:info_stack_shape[0], 0:info_stack_shape[1]] = info_stack
+        self.new_info_stack_memory[index][0:info_stack_shape_[0], 0:info_stack_shape_[1]] = info_stack_
 
 
         self.mem_cntr += 1

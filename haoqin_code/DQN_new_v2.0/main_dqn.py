@@ -12,6 +12,7 @@ import sys
 from Env import *
 from Env.utils import plot_learning_curve, make_env
 
+PRE_TRAIN = False
 
 if __name__ == '__main__':
     env_name = 'shooter'
@@ -35,6 +36,9 @@ if __name__ == '__main__':
 
     if load_checkpoint:
         agent.load_models()
+
+    if PRE_TRAIN:
+        agent.PreTrain()
 
     fname = agent.algo + '_' + agent.env_name + '_lr' + str(agent.lr) +'_' \
             + str(n_games) + 'games'

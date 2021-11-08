@@ -109,3 +109,7 @@ class DQNAgent(object):
         self.learn_step_counter += 1
 
         self.decrement_epsilon()
+
+    def PreTrain(self):
+        self.q_eval.PreTrain()
+        self.q_next.PreTrain()
