@@ -1,7 +1,11 @@
 import numpy as np
 
+import sys
+# sys.path.insert(0, r'../')
+# from Env.constants import *
+
 class ReplayBuffer(object):
-    def __init__(self, max_size, input_shape, n_actions, info_stack_shape=(4, 15)):
+    def __init__(self, max_size, input_shape, n_actions, info_stack_shape=(4, 27)):
         self.mem_size = max_size
         self.mem_cntr = 0
         self.state_memory = np.zeros((self.mem_size, *input_shape),

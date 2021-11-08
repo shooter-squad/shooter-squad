@@ -61,6 +61,7 @@ class Spaceship(pygame.sprite.Sprite):
         self.ultimate_abilities = pygame.sprite.Group()
         self.ultimate_available = True
 
+        self.type = type
         self.enemy_behavior = Action.NOOP  # Only used for enemies
 
     def update(self, action: Action, others: List[pygame.sprite.Sprite]):

@@ -15,6 +15,8 @@ from Env import *
 # ------------------------- Plotting methods -------------------------
 
 
+
+
 def plot_learning_curve(x, scores, epsilons, filename, lines=None):
     fig = plt.figure()
     ax = fig.add_subplot(111, label="1")
@@ -154,21 +156,26 @@ if __name__ == '__main__':
 
     env.reset()
 
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    state, reward, done, info = env.step(1)
-    print(info)
-    info_stack = env.get_info_stack()
-    print(type(info_stack))
-    print(info_stack)
+    done = False
+    while not done:
+        state, reward, done, info = env.step(-1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        # state, reward, done, info = env.step(1)
+        print(info)
+        info_stack = env.get_info_stack()
+        # print(type(info_stack))
+        print(info_stack)
+        print(info_stack.shape)
+        if len(info_stack.shape) < 2:
+            done = True

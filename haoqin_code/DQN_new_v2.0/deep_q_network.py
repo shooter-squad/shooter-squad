@@ -5,8 +5,12 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 
+import sys
+sys.path.insert(0, r'../')
+from Env.constants import *
+
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, info_stack_dims=(4, 15)):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, info_stack_dims=(4, ADDITIONAL_STATE_LEN_PLAYER+ADDITIONAL_STATE_LEN_NORMAL+ADDITIONAL_STATE_LEN_CHARGE)):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
