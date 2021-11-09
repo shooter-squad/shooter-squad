@@ -403,8 +403,10 @@ class GameScene(object):
                 if enemy.type == SpaceshipType.CHARGE_ENEMY and \
                         not enemy.is_dead() and \
                         pygame.sprite.collide_rect(enemy, self.player):
-                    self.player.health = 0
-                    self.reward += Reward.PLAYER_HIT_CHARGE_ENEMY.value
+                    enemy.health = 0
+                    if not self.player.shield_activated:
+                        self.player.health = 0
+                        self.reward += Reward.PLAYER_HIT_CHARGE_ENEMY.value
 
         # 3) Bullets vs obstacles
         pygame.sprite.groupcollide(self.obstacle_group, self.player.bullets, False, True)
