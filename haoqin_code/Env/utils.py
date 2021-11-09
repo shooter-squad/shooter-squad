@@ -5,16 +5,14 @@ import matplotlib.pyplot as plt
 import gym
 import sys
 
-sys.path.insert(0, r'../../')
-from haoqin_code.Env import shooter_env
+# sys.path.insert(0, r'../../')
+# from haoqin_code.Env import shooter_env
 
 sys.path.insert(0, r'../')
 from Env import *
 
 
 # ------------------------- Plotting methods -------------------------
-
-
 
 
 def plot_learning_curve(x, scores, epsilons, filename, lines=None):
@@ -60,11 +58,15 @@ class RepeatActionAndMaxFrame(gym.Wrapper):
         self.no_ops = no_ops
         self.fire_first = fire_first
 
+        self.player_action_num = 0
+
     def step(self, action):
         t_reward = 0.0
         done = False
         for i in range(1):
             obs, reward, done, info = self.env.step(action)
+            self.player_action_num = self.env.player_action_num
+            # print('action in utils', self.env.player_action_num)
             if self.clip_reward:
                 reward = np.clip(np.array([reward]), -1, 1)[0]
             t_reward += reward
@@ -138,12 +140,16 @@ class StackFrames(gym.ObservationWrapper):
     def get_info_stack(self):
         return np.array(self.info_stack)
 
+    def get_player_action(self):
+        return self.env.player_action_num
+
 
 def make_env(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False, no_ops=0, fire_first=False):
     if env_name == 'shooter':
         env = ShooterEnv()
     else:
         env = gym.make(env_name)
+    
     env = RepeatActionAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
     env = PreprocessFrame(shape, env)
     env = StackFrames(env, repeat)
@@ -153,12 +159,14 @@ def make_env(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False, no_ops=0
 
 if __name__ == '__main__':
     env = make_env('shooter')
-
     env.reset()
-
+    # player_action_num = env.get_player_action()
+    
     done = False
     while not done:
         state, reward, done, info = env.step(-1)
+        print('in main: ', env.get_player_action())
+        # print('player action num is: ', player_action_num)
         # state, reward, done, info = env.step(1)
         # state, reward, done, info = env.step(1)
         # state, reward, done, info = env.step(1)

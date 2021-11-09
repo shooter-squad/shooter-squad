@@ -121,6 +121,9 @@ class GameScene(object):
         self.reward = 0
         self.frame_count = 0
 
+        # * adding action_num
+        self.player_action_num = 0
+
         self.Reset()
 
     # ------------------------- Env wrapper methods -------------------------
@@ -183,6 +186,9 @@ class GameScene(object):
 
         if player_action_num == -1:
             player_action_num = 0
+
+        # * add player_action_num
+        self.player_action_num = player_action_num
 
         # Check if game is over
         winner_text = ""

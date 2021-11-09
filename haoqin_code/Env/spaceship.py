@@ -8,7 +8,6 @@ from Env.ultimate_ability import UltimateAbility
 from Env.obstacle import Obstacle
 from Env.constants import *
 
-
 class SpaceshipType(Enum):
     """
     All enemy types in the game.
@@ -94,26 +93,26 @@ class Spaceship(pygame.sprite.Sprite):
 
             if action in [Action.LEFT, Action.RIGHT]:
                 self.rect.x += vel
-                for other in others:
-                    if self.type == SpaceshipType.CHARGE_ENEMY and isinstance(other, Obstacle):
-                        continue
-                    if pygame.sprite.collide_rect(other, self):
-                        self.rect.x -= vel
-                        break
             elif action in [Action.UP, Action.DOWN]:
                 self.rect.y += vel
-                for other in others:
-                    if self.type == SpaceshipType.CHARGE_ENEMY and isinstance(other, Obstacle):
-                        continue
-                    if pygame.sprite.collide_rect(other, self):
-                        self.rect.y -= vel
-                        break
 
-        if self.health <= 0:
-            self.kill()
+            for other in others:
+                if self.type == SpaceshipType.CHARGE_ENEMY:
+                    continue
+                if isinstance(other, Spaceship) and other.is_dead():
+                    continue
+                if pygame.sprite.collide_rect(other, self):
+                    if action in [Action.LEFT, Action.RIGHT]:
+                        self.rect.x -= vel
+                    elif action in [Action.UP, Action.DOWN]:
+                        self.rect.y -= vel
+                    break
 
         # Keep sprite on screen
         self.rect.clamp_ip(self.screen_rect)
+
+    def draw(self, screen: pygame.Surface):
+        screen.blit(self.image, self.rect)
 
     def fire(self):
         if self.time_since_last_bullet < self.bullet_interval:

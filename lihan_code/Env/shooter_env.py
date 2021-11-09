@@ -25,12 +25,18 @@ class ShooterEnv(Env):
         self.done = self.game_scene.Done()
         self.info = self.game_scene.AdditionalState()
 
+        # * add player_action_num
+        self.player_action_num = 0
+
     def step(self, action_num: int):
         # More return values
         self.done = self.game_scene.Play(action_num)
         self.reward = self.game_scene.Reward()
         self.state = self.game_scene.ScreenShot()
         self.info = self.game_scene.AdditionalState()
+
+        # * add player_action_num
+        self.player_action_num = self.game_scene.player_action_num
 
         return self.state, self.reward, self.done, self.info
 
@@ -43,6 +49,9 @@ class ShooterEnv(Env):
         self.done = self.game_scene.Done()
         self.info = self.game_scene.AdditionalState()
         return self.state
+
+    def player_action_num(self):
+        return self.player_action_num
 
 
 if __name__ == '__main__':

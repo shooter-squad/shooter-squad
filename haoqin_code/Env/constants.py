@@ -2,6 +2,7 @@ import os
 from enum import Enum
 
 
+
 # ------------------------- Parameters -------------------------
 class Action(Enum):
     """
@@ -26,6 +27,7 @@ class Reward(Enum):
     PLAYER_GET_HEALTH_PACK = 10
     ULTIMATE_HIT_ENEMY = 10
     ULTIMATE_HIT_PLAYER = -10
+    PLAYER_HIT_CHARGE_ENEMY = -100
 
 
 PURE_COLOR_DISPLAY = False
@@ -45,7 +47,7 @@ NORMAL_ENEMY_COUNT = 2
 CHARGE_ENEMY_COUNT = 1
 WIN_COUNT = 2
 ENEMY_START_Y_RANGES = [[0, 100], [130, 220]]
-CHARGE_ENEMY_SPAWN_INTERVAL = 100
+CHARGE_ENEMY_SPAWN_INTERVAL = 600
 
 ADDITIONAL_STATE_LEN_PLAYER = 6
 ADDITIONAL_STATE_LEN_NORMAL = 18
