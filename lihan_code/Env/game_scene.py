@@ -314,12 +314,16 @@ class GameScene(object):
         if enemy.ultimate_available and calculate_distance(enemy, self.player) <= ULTIMATE_ABILITY_WIDTH / 2:
             return Action.USE_ULTIMATE_ABILITY
 
-        if enemy.enemy_behavior == Action.RIGHT:
-            if enemy.rect.left <= 0:
+        if calculate_distance(enemy, self.player) <= SPACESHIP_WIDTH * 2:
+            if enemy.enemy_behavior == Action.RIGHT:
                 enemy.enemy_behavior = Action.LEFT
-        if enemy.enemy_behavior == Action.LEFT:
-            if enemy.rect.right >= WIDTH:
+            if enemy.enemy_behavior == Action.LEFT:
                 enemy.enemy_behavior = Action.RIGHT
+
+        if enemy.enemy_behavior == Action.RIGHT and enemy.rect.left <= 0:
+            enemy.enemy_behavior = Action.LEFT
+        if enemy.enemy_behavior == Action.LEFT and enemy.rect.right >= WIDTH:
+            enemy.enemy_behavior = Action.RIGHT
         fire_or_shield = Action.ACTIVATE_SHIELD if enemy.shield_enabled and enemy.get_shield_cool_down() == 0 else Action.FIRE
         if enemy.type == SpaceshipType.CHARGE_ENEMY or enemy.enemy_behavior == Action.UP:
             if enemy.rect.bottom >= HEIGHT:
