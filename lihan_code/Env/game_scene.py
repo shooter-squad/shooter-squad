@@ -429,7 +429,7 @@ class GameScene(object):
         if NEGATIVE_REWARD_ENABLED:
             self.reward -= NEGATIVE_REWARD
 
-        print(self.reward)
+        # print(self.reward)
 
     def draw_window(self):
         self.screen.blit(self.background, (0, 0))
