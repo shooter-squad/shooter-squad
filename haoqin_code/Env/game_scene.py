@@ -4,6 +4,7 @@ from typing import Tuple
 
 import pygame
 import numpy as np
+
 import sys
 sys.path.insert(0, r'../')
 from Env.constants import *
@@ -83,7 +84,7 @@ class GameScene(object):
             screen_rect=self.screen.get_rect(),
             shielded_image=yellow_shielded_image,
             ultimate_ability_image=yellow_ultimate_ability_image,
-            start_health=YELLOW_START_HEALTH,
+            start_health=PLAYER_START_HEALTH,
             start_x=YELLOW_START_POSITION[0],
             start_y=YELLOW_START_POSITION[1],
             color=YELLOW_COLOR,
@@ -103,7 +104,7 @@ class GameScene(object):
                 shielded_image=self.red_shielded_image,
                 ultimate_ability_image=self.red_ultimate_ability_image,
                 screen_rect=self.screen.get_rect(),
-                start_health=RED_START_HEALTH,
+                start_health=ENEMY_START_HEALTH,
                 start_x=start_x,
                 start_y=start_y,
                 color=RED_COLOR,
@@ -122,6 +123,7 @@ class GameScene(object):
         self.reward = 0
         self.frame_count = 0
 
+        # * adding action_num
         self.player_action_num = 0
 
         self.Reset()
@@ -150,7 +152,7 @@ class GameScene(object):
                     enemy.enemy_behavior = Action.LEFT if random.random() < 0.5 else Action.RIGHT
                 else:
                     enemy.kill()
-        self.spawn_obstacles()
+        # self.spawn_obstacles()
         self.health_pack_group.empty()
 
         self.reward = 0
@@ -187,7 +189,7 @@ class GameScene(object):
         if player_action_num == -1:
             player_action_num = 0
 
-        # print('player action num', player_action_num)
+        # * add player_action_num
         self.player_action_num = player_action_num
 
         # Check if game is over
@@ -219,13 +221,13 @@ class GameScene(object):
         """
         Returns additional state parameters
         """
-        player_arr = np.zeros(ADDITIONAL_STATE_LEN_PLAYER, dtype=np.int64)
-        normal_arr = np.zeros(ADDITIONAL_STATE_LEN_NORMAL, dtype=np.int64)
-        charge_arr = np.zeros(ADDITIONAL_STATE_LEN_CHARGE, dtype=np.int64)
+        player_arr = np.zeros(ADDITIONAL_STATE_LEN_PLAYER, dtype=np.float32)
+        normal_arr = np.zeros(ADDITIONAL_STATE_LEN_NORMAL, dtype=np.float32)
+        charge_arr = np.zeros(ADDITIONAL_STATE_LEN_CHARGE, dtype=np.float32)
 
         player_temp = np.array([
-            self.player.health,
-            self.player.get_shield_cool_down(),
+            self.player.health / PLAYER_START_HEALTH,
+            self.player.get_shield_cool_down() / SHIELD_COOL_DOWN,
             int(self.player.ultimate_available)
         ])
         player_arr[0:player_temp.shape[0]] = player_temp
@@ -235,14 +237,14 @@ class GameScene(object):
         for enemy in self.enemy_group.sprites():
             if isinstance(enemy, Spaceship) and enemy.type == SpaceshipType.NORMAL_ENEMY:
                 normal_temp += [
-                    enemy.health,
-                    enemy.get_shield_cool_down(),
+                    enemy.health / ENEMY_START_HEALTH,
+                    enemy.get_shield_cool_down() / SHIELD_COOL_DOWN,
                     int(enemy.ultimate_available)
                 ]
             elif isinstance(enemy, Spaceship) and enemy.type == SpaceshipType.CHARGE_ENEMY:
                 charge_temp += [
-                    enemy.health,
-                    enemy.get_shield_cool_down(),
+                    enemy.health / ENEMY_START_HEALTH,
+                    enemy.get_shield_cool_down() / SHIELD_COOL_DOWN,
                     int(enemy.ultimate_available)
                 ]
 
@@ -283,7 +285,7 @@ class GameScene(object):
         health_pack = HealthPack(
             image=self.health_pack_image,
             x=random.randrange(0, WIDTH - HEALTH_PACK_WIDTH, HEALTH_PACK_WIDTH // 3),
-            y=random.randrange(OBSTACLE_Y_MAX, HEIGHT, HEALTH_PACK_HEIGHT // 3)
+            y=random.randrange(OBSTACLE_Y_MAX, HEIGHT - HEALTH_PACK_HEIGHT, HEALTH_PACK_HEIGHT // 3)
         )
         self.health_pack_group.add(health_pack)
 
@@ -296,7 +298,7 @@ class GameScene(object):
             shielded_image=self.red_shielded_image,
             ultimate_ability_image=self.blue_ultimate_ability_image,
             screen_rect=self.screen.get_rect(),
-            start_health=RED_START_HEALTH,
+            start_health=ENEMY_START_HEALTH,
             start_x=random.randrange(WIDTH // 2 - 120, WIDTH // 2 + 120 - SPACESHIP_WIDTH),
             start_y=0,
             color=BLUE_COLOR,
@@ -314,12 +316,16 @@ class GameScene(object):
         if enemy.ultimate_available and calculate_distance(enemy, self.player) <= ULTIMATE_ABILITY_WIDTH / 2:
             return Action.USE_ULTIMATE_ABILITY
 
-        if enemy.enemy_behavior == Action.RIGHT:
-            if enemy.rect.left <= 0:
+        if calculate_distance(enemy, self.player) <= SPACESHIP_WIDTH * 2:
+            if enemy.enemy_behavior == Action.RIGHT:
                 enemy.enemy_behavior = Action.LEFT
-        if enemy.enemy_behavior == Action.LEFT:
-            if enemy.rect.right >= WIDTH:
+            if enemy.enemy_behavior == Action.LEFT:
                 enemy.enemy_behavior = Action.RIGHT
+
+        if enemy.enemy_behavior == Action.RIGHT and enemy.rect.left <= 0:
+            enemy.enemy_behavior = Action.LEFT
+        if enemy.enemy_behavior == Action.LEFT and enemy.rect.right >= WIDTH:
+            enemy.enemy_behavior = Action.RIGHT
         fire_or_shield = Action.ACTIVATE_SHIELD if enemy.shield_enabled and enemy.get_shield_cool_down() == 0 else Action.FIRE
         if enemy.type == SpaceshipType.CHARGE_ENEMY or enemy.enemy_behavior == Action.UP:
             if enemy.rect.bottom >= HEIGHT:
@@ -425,7 +431,7 @@ class GameScene(object):
         if NEGATIVE_REWARD_ENABLED:
             self.reward -= NEGATIVE_REWARD
 
-        print(self.reward)
+        # print(self.reward)
 
     def draw_window(self):
         self.screen.blit(self.background, (0, 0))

@@ -2,7 +2,6 @@ import os
 from enum import Enum
 
 
-
 # ------------------------- Parameters -------------------------
 class Action(Enum):
     """
@@ -65,8 +64,8 @@ SPACESHIP_WIDTH = 60
 SPACESHIP_HEIGHT = 72
 SHIELD_WIDTH = 118
 SHIELD_HEIGHT = 114
-RED_START_HEALTH = 4
-YELLOW_START_HEALTH = 10
+ENEMY_START_HEALTH = 4
+PLAYER_START_HEALTH = 10
 
 RED_START_POSITION = (375, 80)
 YELLOW_START_POSITION = (375, 650)

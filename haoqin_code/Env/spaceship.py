@@ -8,6 +8,7 @@ from Env.ultimate_ability import UltimateAbility
 from Env.obstacle import Obstacle
 from Env.constants import *
 
+
 class SpaceshipType(Enum):
     """
     All enemy types in the game.

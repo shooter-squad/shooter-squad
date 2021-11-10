@@ -5,6 +5,7 @@ from gym.spaces import Discrete, Box
 from Env.constants import *
 from Env.game_scene import GameScene
 
+
 class ShooterEnv(Env):
     """
     The custom environment class for our shooter game.
@@ -24,6 +25,7 @@ class ShooterEnv(Env):
         self.done = self.game_scene.Done()
         self.info = self.game_scene.AdditionalState()
 
+        # * add player_action_num
         self.player_action_num = 0
 
     def step(self, action_num: int):
@@ -33,8 +35,8 @@ class ShooterEnv(Env):
         self.state = self.game_scene.ScreenShot()
         self.info = self.game_scene.AdditionalState()
 
+        # * add player_action_num
         self.player_action_num = self.game_scene.player_action_num
-        # print('action num in sh env is', self.player_action_num)
 
         return self.state, self.reward, self.done, self.info
 
@@ -48,6 +50,9 @@ class ShooterEnv(Env):
         self.info = self.game_scene.AdditionalState()
         return self.state
 
+    def player_action_num(self):
+        return self.player_action_num
+
 
 if __name__ == '__main__':
     env = ShooterEnv()
@@ -56,8 +61,13 @@ if __name__ == '__main__':
         0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7
     ]
 
+    score = 0
+
     while True:
         state, reward, done, info = env.step(-1)
+        score += reward
+        print("Reward: " + str(score))
         if done:
+            score = 0
             env.reset()
-        print(env.info)
+        # print(env.info)

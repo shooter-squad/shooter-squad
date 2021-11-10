@@ -3,6 +3,7 @@ import math
 
 from Env.constants import *
 
+
 class UltimateAbility(pygame.sprite.Sprite):
     """
     The ultimate ability class.
@@ -31,4 +32,3 @@ class UltimateAbility(pygame.sprite.Sprite):
         if self.frame_counter % ULTIMATE_ABILITY_DAMAGE_INTERVAL != 1:
             return 0
         return math.ceil(ULTIMATE_ABILITY_MAX_DAMAGE * self.alpha / 255)
-
