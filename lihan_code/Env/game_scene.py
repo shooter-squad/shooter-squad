@@ -283,7 +283,7 @@ class GameScene(object):
         health_pack = HealthPack(
             image=self.health_pack_image,
             x=random.randrange(0, WIDTH - HEALTH_PACK_WIDTH, HEALTH_PACK_WIDTH // 3),
-            y=random.randrange(OBSTACLE_Y_MAX, HEIGHT, HEALTH_PACK_HEIGHT // 3)
+            y=random.randrange(OBSTACLE_Y_MAX, HEIGHT - HEALTH_PACK_HEIGHT, HEALTH_PACK_HEIGHT // 3)
         )
         self.health_pack_group.add(health_pack)
 

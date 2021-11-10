@@ -35,12 +35,9 @@ class DQNAgent(object):
                                     chkpt_dir=self.chkpt_dir, pre_train_dir=pre_train_dir)
 
     def choose_action(self, observation, info_stack): # intially very exploratory, later becomes greedy
-        print('Agent choose action')
         if np.random.random() > self.epsilon:
             state = T.tensor([observation],dtype=T.float).to(self.q_eval.device) # NOTE: state: [1, 4, 84, 84]
             info_stack = T.tensor([info_stack]).to(self.q_eval.device) # NOTE: info_stack: [1, 4, 6]
-            print('q_eval forward in choose action')
-            print('state shape is: ', state.shape)
             actions = self.q_eval.forward(state, info_stack)
             action = T.argmax(actions).item()
         else:
@@ -82,7 +79,6 @@ class DQNAgent(object):
         self.q_next.load_checkpoint()
 
     def learn(self):
-        print('Agent learn')
         if self.memory.mem_cntr < self.batch_size:
             return
 
@@ -91,13 +87,10 @@ class DQNAgent(object):
         self.replace_target_network()
 
         states, actions, rewards, states_, dones, info_stack, info_stack_ = self.sample_memory() # *: state: [32, 4, 84, 84]; actions: [32]; dones: [32]; rewards:[32]
-        # print('In agent.learn(): ', states.shape, actions.shape)
         indices = np.arange(self.batch_size)
 
         # temporal difference learning
-        print('q_eval forward in learn')
         q_pred = self.q_eval.forward(states, info_stack)[indices, actions]
-        print('q_next forward in learn')
         q_next = self.q_next.forward(states_, info_stack_).max(dim=1)[0]
 
         q_next[dones] = 0.0

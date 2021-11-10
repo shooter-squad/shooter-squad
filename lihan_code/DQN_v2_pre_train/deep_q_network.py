@@ -30,7 +30,6 @@ class DeepQNetwork(nn.Module):
 
         self.loss = nn.MSELoss()
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
-        print(self.device)
         self.to(self.device)
 
     def calculate_conv_output_dims(self, input_dims):
@@ -42,28 +41,18 @@ class DeepQNetwork(nn.Module):
 
     def forward(self, state, info_stack):
         # * N=batch_size=64, C_in=input_channel=4, H=84, W=84
-        print('ENTERING FORWARD')
-        print('state.shape: ', state.shape)
         conv1 = F.relu(self.conv1(state))
-        print('conv1.shape: ', conv1.shape)
         conv2 = F.relu(self.conv2(conv1))
-        print('conv2.shape: ', conv2.shape)
         conv3 = F.relu(self.conv3(conv2))
-        print('conv3.shape: ', conv3.shape)
         # conv3 shape is BS x n_filters x H x W
         conv_state = conv3.view(conv3.size()[0], -1)
-        print('conv_state.shape: ', conv_state.shape)
         # * flatten info_stack
         info_stack_flatten = info_stack.view(info_stack.size()[0], -1)
-        print('info_stack_flatten.shape: ', conv_state.shape)
         flatten_cat = T.cat([conv_state, info_stack_flatten], dim=1)
         
-        print('flatten_cat.shape: ', flatten_cat.shape)
         # conv_state shape is BS x (n_filters * H * W)
         flat1 = F.relu(self.fc1(flatten_cat))
-        print('flat1.shape: ', flat1.shape)
         actions = self.fc2(flat1) # // NOTE: actions: [32, 6]
-        print('actions.shape: ', actions.shape)
 
         return actions
 
@@ -79,7 +68,6 @@ class DeepQNetwork(nn.Module):
         print('... loading pre_train model from ' + str(self.pre_train_file) + ' ...')
 
         pre_train_state = T.load(self.pre_train_file, map_location='cuda')
-        print(type(pre_train_state))
         cur_state_dict = self.state_dict()  # The current model's state_dict
 
         for key in pre_train_state.keys():

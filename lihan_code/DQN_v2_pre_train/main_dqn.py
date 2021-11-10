@@ -13,6 +13,7 @@ from Env import *
 from Env.utils import plot_learning_curve, make_env
 
 PRE_TRAIN = True
+STEP_LIMIT_PER_GAME = 2500
 
 if __name__ == '__main__':
     env_name = 'shooter'
@@ -20,13 +21,12 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    epsilon = 0.0
-    eps_min =0.1
+    epsilon = 0.5
+    eps_min = 0.1
     if load_checkpoint:
         epsilon = 0.0
         eps_min = 0.001
     n_games = 3000
-    print('env obervation space shape is ', env.observation_space.shape)
     agent = DQNAgent(gamma=0.99, epsilon=epsilon, lr=0.0001,
                      input_dims=(env.observation_space.shape),
                      n_actions=env.action_space.n, mem_size=30000, eps_min=eps_min,
@@ -61,13 +61,11 @@ if __name__ == '__main__':
         observation = env.reset()
         info_stack = env.get_info_stack()
         score = 0
-        while not done:
+        cur_step = 0
+        while not done or cur_step > STEP_LIMIT_PER_GAME:
             # // NOTE: whenever the agent makes a move, he enters a new state. it store the observation, action, reward, obseravation_, done in his memory for REPLAY, which has size of 40000.
-            print('ENTERING THE GAME')
             
             action = agent.choose_action(observation, info_stack) # * action shape is scalar (e.g. 3)
-            print('observation shape ', observation.shape)
-            print(info_stack)
             # print('action shape is: ', action)
             # print('in one iteration')
             
@@ -82,9 +80,6 @@ if __name__ == '__main__':
             
             observation_, reward, done, info = env.step(action) # * observation shape is (4, 84, 84), reward = scalar, all variables are unbatched, info-stack: (4, 6)
             info_stack_ = env.get_info_stack()
-            print('INFO_STACK')
-            print(info_stack)
-            print('action shape: ', action, 'obseravation shape', observation.shape)
             time_prev = time.time()
             score += reward
 
@@ -95,10 +90,10 @@ if __name__ == '__main__':
                 agent.learn()
             observation = observation_
             info_stack = info_stack_
-            n_steps += 1
+            cur_step += 1
             time_curr = time.time()
-            print('DONE: ', done)
 
+        n_steps += cur_step
         scores.append(score)
         steps_array.append(n_steps)
 
