@@ -61,8 +61,13 @@ if __name__ == '__main__':
         0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7
     ]
 
+    score = 0
+
     while True:
         state, reward, done, info = env.step(-1)
+        score += reward
+        print("Reward: " + str(score))
         if done:
+            score = 0
             env.reset()
-        print(env.info)
+        # print(env.info)

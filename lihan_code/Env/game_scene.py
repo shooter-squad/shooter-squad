@@ -82,7 +82,7 @@ class GameScene(object):
             screen_rect=self.screen.get_rect(),
             shielded_image=yellow_shielded_image,
             ultimate_ability_image=yellow_ultimate_ability_image,
-            start_health=YELLOW_START_HEALTH,
+            start_health=PLAYER_START_HEALTH,
             start_x=YELLOW_START_POSITION[0],
             start_y=YELLOW_START_POSITION[1],
             color=YELLOW_COLOR,
@@ -102,7 +102,7 @@ class GameScene(object):
                 shielded_image=self.red_shielded_image,
                 ultimate_ability_image=self.red_ultimate_ability_image,
                 screen_rect=self.screen.get_rect(),
-                start_health=RED_START_HEALTH,
+                start_health=ENEMY_START_HEALTH,
                 start_x=start_x,
                 start_y=start_y,
                 color=RED_COLOR,
@@ -219,13 +219,13 @@ class GameScene(object):
         """
         Returns additional state parameters
         """
-        player_arr = np.zeros(ADDITIONAL_STATE_LEN_PLAYER, dtype=np.int64)
-        normal_arr = np.zeros(ADDITIONAL_STATE_LEN_NORMAL, dtype=np.int64)
-        charge_arr = np.zeros(ADDITIONAL_STATE_LEN_CHARGE, dtype=np.int64)
+        player_arr = np.zeros(ADDITIONAL_STATE_LEN_PLAYER, dtype=np.float32)
+        normal_arr = np.zeros(ADDITIONAL_STATE_LEN_NORMAL, dtype=np.float32)
+        charge_arr = np.zeros(ADDITIONAL_STATE_LEN_CHARGE, dtype=np.float32)
 
         player_temp = np.array([
-            self.player.health,
-            self.player.get_shield_cool_down(),
+            self.player.health / PLAYER_START_HEALTH,
+            self.player.get_shield_cool_down() / SHIELD_COOL_DOWN,
             int(self.player.ultimate_available)
         ])
         player_arr[0:player_temp.shape[0]] = player_temp
@@ -235,14 +235,14 @@ class GameScene(object):
         for enemy in self.enemy_group.sprites():
             if isinstance(enemy, Spaceship) and enemy.type == SpaceshipType.NORMAL_ENEMY:
                 normal_temp += [
-                    enemy.health,
-                    enemy.get_shield_cool_down(),
+                    enemy.health / ENEMY_START_HEALTH,
+                    enemy.get_shield_cool_down() / SHIELD_COOL_DOWN,
                     int(enemy.ultimate_available)
                 ]
             elif isinstance(enemy, Spaceship) and enemy.type == SpaceshipType.CHARGE_ENEMY:
                 charge_temp += [
-                    enemy.health,
-                    enemy.get_shield_cool_down(),
+                    enemy.health / ENEMY_START_HEALTH,
+                    enemy.get_shield_cool_down() / SHIELD_COOL_DOWN,
                     int(enemy.ultimate_available)
                 ]
 
@@ -296,7 +296,7 @@ class GameScene(object):
             shielded_image=self.red_shielded_image,
             ultimate_ability_image=self.blue_ultimate_ability_image,
             screen_rect=self.screen.get_rect(),
-            start_health=RED_START_HEALTH,
+            start_health=ENEMY_START_HEALTH,
             start_x=random.randrange(WIDTH // 2 - 120, WIDTH // 2 + 120 - SPACESHIP_WIDTH),
             start_y=0,
             color=BLUE_COLOR,
