@@ -150,7 +150,7 @@ class GameScene(object):
                     enemy.enemy_behavior = Action.LEFT if random.random() < 0.5 else Action.RIGHT
                 else:
                     enemy.kill()
-        self.spawn_obstacles()
+        # self.spawn_obstacles()
         self.health_pack_group.empty()
 
         self.reward = 0

@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     best_score = -np.inf
     load_checkpoint = False
-    epsilon = 1.0
+    epsilon = 0.0
     eps_min =0.1
     if load_checkpoint:
         epsilon = 0.0
@@ -39,8 +39,6 @@ if __name__ == '__main__':
 
     if PRE_TRAIN:
         agent.pre_train()
-
-    exit()
 
     fname = agent.algo + '_' + agent.env_name + '_lr' + str(agent.lr) +'_' \
             + str(n_games) + 'games'

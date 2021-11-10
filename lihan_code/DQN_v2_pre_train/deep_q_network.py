@@ -78,7 +78,7 @@ class DeepQNetwork(nn.Module):
     def pre_train(self):
         print('... loading pre_train model from ' + str(self.pre_train_file) + ' ...')
 
-        pre_train_state = T.load(self.pre_train_file, map_location='cpu')
+        pre_train_state = T.load(self.pre_train_file, map_location='cuda')
         print(type(pre_train_state))
         cur_state_dict = self.state_dict()  # The current model's state_dict
 
@@ -88,10 +88,10 @@ class DeepQNetwork(nn.Module):
                     cur_state_dict[key] = nn.Parameter(pre_train_state[key].data)
                     print('Success: Loaded {} from pre-train model'.format(key))
                 else:
-                    print('Error: Size mismatch for {}, size of loaded model {}, size of current model {}'.format(
+                    print('Warn: Size mismatch for {}, size of loaded model {}, size of current model {}'.format(
                         key, pre_train_state[key].shape, cur_state_dict[key].shape))
-                    temp = cur_state_dict[key].numpy()
-                    pre_arr = pre_train_state[key].numpy()
+                    temp = cur_state_dict[key].cpu().numpy()
+                    pre_arr = pre_train_state[key].cpu().numpy()
                     if len(temp.shape) == 2:
                         temp[0:pre_arr.shape[0], 0:pre_arr.shape[1]] = pre_arr
                     elif len(temp.shape) == 1:
@@ -101,4 +101,4 @@ class DeepQNetwork(nn.Module):
             else:
                 print('Error: Loaded weight {} not present in current model'.format(key))
 
-        # self.load_state_dict(cur_state_dict)
+        self.load_state_dict(cur_state_dict)
