@@ -28,7 +28,7 @@ SAVE_IMG = False
 BATCH_SIZE = 64
 N_EPOCH = 5
  
-GAME = 0
+GAME = 15
  
 N_DEMO = 15
  
@@ -55,6 +55,19 @@ if MODE == 'DEMO':
     action_list = []
  
     n_steps = 0
+
+    # Clear directory
+    state_file_name = game_name + '/image_demo'
+    info_file_name = game_name + '/info_demo'
+    action_file_name = game_name + '/action_demo'
+
+    def clear_directory(dir):
+        for f in os.listdir(dir):
+            os.remove(os.path.join(dir, f))
+
+    clear_directory(state_file_name)
+    clear_directory(info_file_name)
+    clear_directory(action_file_name)
  
     while not done:
         state, reward, done, info = env.step(-1)
@@ -81,7 +94,7 @@ if MODE == 'DEMO':
         # print('iter = ', iter)
         iter += 1
         if iter >= PARTIAL_BATCH_SIZE or done:
- 
+            print(env.game_scene.player.health)
             action_tensor = T.Tensor(action_list)
  
             state_file_name = game_name + '/image_demo/image_' + str(file_iter) + '.npy'
