@@ -211,11 +211,11 @@ class GameScene(object):
                 player_action_num = 1
             if keys_pressed[pygame.K_RIGHT]:
                 player_action_num = 2
-            if keys_pressed[pygame.K_UP]:
-                player_action_num = 3
-            if keys_pressed[pygame.K_DOWN]:
-                player_action_num = 4
             if keys_pressed[pygame.K_SPACE]:
+                player_action_num = 3
+            if keys_pressed[pygame.K_UP]:
+                player_action_num = 4
+            if keys_pressed[pygame.K_DOWN]:
                 player_action_num = 5
             if keys_pressed[pygame.K_q]:
                 player_action_num = 6
