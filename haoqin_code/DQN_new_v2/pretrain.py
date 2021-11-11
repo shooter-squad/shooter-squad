@@ -23,14 +23,14 @@ device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 '''
 MODE:{'DEMO', 'PRETRAIN'}
 '''
-MODE = 'PRETRAIN'
+MODE = 'DEMO'
 SAVE_IMG = False
 BATCH_SIZE = 64
 N_EPOCH = 5
  
 GAME = 0
  
-N_DEMO = 1
+N_DEMO = 15
  
 PARTIAL_BATCH_SIZE = 8
  
@@ -62,7 +62,7 @@ if MODE == 'DEMO':
         state = np.expand_dims(state, axis=0)
         info = np.expand_dims(info, axis=0)
  
-        action = env.get_player_action()
+        action = env.player_action_num
        
         if image_tensor is None:
             image_tensor = state

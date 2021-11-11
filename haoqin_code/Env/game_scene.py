@@ -5,8 +5,6 @@ from typing import Tuple
 import pygame
 import numpy as np
 
-import sys
-sys.path.insert(0, r'../')
 from Env.constants import *
 from Env.health_pack import HealthPack
 from Env.obstacle import Obstacle
@@ -46,7 +44,7 @@ class GameScene(object):
         self.winner_font = pygame.font.SysFont(WINNER_FONT[0], WINNER_FONT[1])
 
         # Load images
-        yellow_spaceship_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_IMAGE_PATH),
+        self.yellow_spaceship_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_IMAGE_PATH),
                                                         (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
         self.red_spaceship_image = pygame.transform.rotate(
             pygame.transform.scale(pygame.image.load(RED_SPACESHIP_IMAGE_PATH), (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)),
@@ -55,7 +53,7 @@ class GameScene(object):
             pygame.transform.scale(pygame.image.load(BLUE_SPACESHIP_IMAGE_PATH), (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)),
             180)
 
-        yellow_shielded_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_SHIELDED_IMAGE_PATH),
+        self.yellow_shielded_image = pygame.transform.scale(pygame.image.load(YELLOW_SPACESHIP_SHIELDED_IMAGE_PATH),
                                                        (SHIELD_WIDTH, SHIELD_HEIGHT))
         self.red_shielded_image = pygame.transform.rotate(
             pygame.transform.scale(pygame.image.load(RED_SPACESHIP_SHIELDED_IMAGE_PATH), (SHIELD_WIDTH, SHIELD_HEIGHT)),
@@ -66,24 +64,95 @@ class GameScene(object):
         self.health_pack_image = pygame.transform.scale(pygame.image.load(HEALTH_PACK_IMAGE_PATH),
                                                         (HEALTH_PACK_WIDTH, HEALTH_PACK_HEIGHT))
 
-        yellow_ultimate_ability_image = pygame.transform.scale(pygame.image.load(YELLOW_ULTIMATE_ABILITY_IMAGE_PATH),
+        self.yellow_ultimate_ability_image = pygame.transform.scale(pygame.image.load(YELLOW_ULTIMATE_ABILITY_IMAGE_PATH),
                                                                (ULTIMATE_ABILITY_WIDTH, ULTIMATE_ABILITY_HEIGHT))
         self.red_ultimate_ability_image = pygame.transform.scale(pygame.image.load(RED_ULTIMATE_ABILITY_IMAGE_PATH),
                                                                  (ULTIMATE_ABILITY_WIDTH, ULTIMATE_ABILITY_HEIGHT))
         self.blue_ultimate_ability_image = pygame.transform.scale(pygame.image.load(BLUE_ULTIMATE_ABILITY_IMAGE_PATH),
                                                                   (ULTIMATE_ABILITY_WIDTH, ULTIMATE_ABILITY_HEIGHT))
 
+        # =========================== Reset ===========================
         if PURE_COLOR_DISPLAY:
             self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
         else:
-            # self.background = pygame.transform.scale(pygame.image.load(SPACE_IMAGE_PATH), (WIDTH, HEIGHT))
             self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
 
         self.player = Spaceship(
-            image=yellow_spaceship_image,
+            image=self.yellow_spaceship_image,
             screen_rect=self.screen.get_rect(),
-            shielded_image=yellow_shielded_image,
-            ultimate_ability_image=yellow_ultimate_ability_image,
+            shielded_image=self.yellow_shielded_image,
+            ultimate_ability_image=self.yellow_ultimate_ability_image,
+            start_health=PLAYER_START_HEALTH,
+            start_x=YELLOW_START_POSITION[0],
+            start_y=YELLOW_START_POSITION[1],
+            color=YELLOW_COLOR,
+            up_direction=True,
+            is_player=True
+        )
+        self.player_group = pygame.sprite.Group()
+        self.player_group.add(self.player)
+
+        self.enemy_group = pygame.sprite.Group()
+
+        start_x = random.randrange(0, WIDTH - SPACESHIP_WIDTH)
+        for i in range(NORMAL_ENEMY_COUNT):
+            start_y = random.randrange(ENEMY_START_Y_RANGES[i][0], ENEMY_START_Y_RANGES[i][1])
+            enemy = Spaceship(
+                image=self.red_spaceship_image,
+                shielded_image=self.red_shielded_image,
+                ultimate_ability_image=self.red_ultimate_ability_image,
+                screen_rect=self.screen.get_rect(),
+                start_health=ENEMY_START_HEALTH,
+                start_x=start_x,
+                start_y=start_y,
+                color=RED_COLOR,
+                up_direction=False,
+                is_player=False
+            )
+            start_x += WIDTH // NORMAL_ENEMY_COUNT
+            enemy.enemy_behavior = Action.LEFT if random.random() < 0.5 else Action.RIGHT
+            self.enemy_group.add(enemy)
+
+        self.obstacle_group = pygame.sprite.Group()
+        self.health_pack_group = pygame.sprite.Group()
+
+        self.clock = pygame.time.Clock()
+        self.done = False
+        self.reward = 0
+        self.frame_count = 0
+
+        # * adding action_num
+        self.player_action_num = 0
+        # =========================== Reset ===========================
+
+        # self.Reset()
+
+    # ------------------------- Env wrapper methods -------------------------
+
+    def ActionCount(self):
+        return len(Action)
+
+    def ScreenShot(self):
+        pixels_arr = pygame.surfarray.array3d(self.screen)
+        return pixels_arr
+
+    def Done(self):
+        return self.done
+
+    def Reward(self):
+        return self.reward
+
+    def Reset(self):
+        if PURE_COLOR_DISPLAY:
+            self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
+        else:
+            self.background = pygame.Surface((WIDTH, HEIGHT)).convert()
+
+        self.player = Spaceship(
+            image=self.yellow_spaceship_image,
+            screen_rect=self.screen.get_rect(),
+            shielded_image=self.yellow_shielded_image,
+            ultimate_ability_image=self.yellow_ultimate_ability_image,
             start_health=PLAYER_START_HEALTH,
             start_x=YELLOW_START_POSITION[0],
             start_y=YELLOW_START_POSITION[1],
@@ -126,39 +195,6 @@ class GameScene(object):
         # * adding action_num
         self.player_action_num = 0
 
-        self.Reset()
-
-    # ------------------------- Env wrapper methods -------------------------
-
-    def ActionCount(self):
-        return len(Action)
-
-    def ScreenShot(self):
-        pixels_arr = pygame.surfarray.array3d(self.screen)
-        return pixels_arr
-
-    def Done(self):
-        return self.done
-
-    def Reward(self):
-        return self.reward
-
-    def Reset(self):
-        self.player.reset()
-        for enemy in self.enemy_group.sprites():
-            if isinstance(enemy, Spaceship):
-                if enemy.type == SpaceshipType.NORMAL_ENEMY:
-                    enemy.reset()
-                    enemy.enemy_behavior = Action.LEFT if random.random() < 0.5 else Action.RIGHT
-                else:
-                    enemy.kill()
-        # self.spawn_obstacles()
-        self.health_pack_group.empty()
-
-        self.reward = 0
-        self.frame_count = 0
-        self.done = False
-
     def Play(self, player_action_num: int):
         # Human input
         for event in pygame.event.get():
@@ -175,11 +211,11 @@ class GameScene(object):
                 player_action_num = 1
             if keys_pressed[pygame.K_RIGHT]:
                 player_action_num = 2
-            if keys_pressed[pygame.K_UP]:
-                player_action_num = 3
-            if keys_pressed[pygame.K_DOWN]:
-                player_action_num = 4
             if keys_pressed[pygame.K_SPACE]:
+                player_action_num = 3
+            if keys_pressed[pygame.K_UP]:
+                player_action_num = 4
+            if keys_pressed[pygame.K_DOWN]:
                 player_action_num = 5
             if keys_pressed[pygame.K_q]:
                 player_action_num = 6
