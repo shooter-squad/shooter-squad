@@ -10,9 +10,9 @@ class Action(Enum):
     NOOP = 0
     LEFT = 1
     RIGHT = 2
-    UP = 3
-    DOWN = 4
-    FIRE = 5
+    FIRE = 3
+    UP = 4
+    DOWN = 5
     ACTIVATE_SHIELD = 6
     USE_ULTIMATE_ABILITY = 7
 
