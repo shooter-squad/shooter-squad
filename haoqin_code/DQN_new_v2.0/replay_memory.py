@@ -32,8 +32,8 @@ class ReplayBuffer(object):
         info_stack_shape = info_stack.shape
         info_stack_shape_ = info_stack_.shape
 
-        print('INFO_STACK SHAPE: ', info_stack_shape)
-        print('INFO_STACK SHAPE_: ', info_stack_shape_)
+        # print('INFO_STACK SHAPE: ', info_stack_shape)
+        # print('INFO_STACK SHAPE_: ', info_stack_shape_)
 
 
         self.info_stack_memory[index][0:info_stack_shape[0], 0:info_stack_shape[1]] = info_stack
