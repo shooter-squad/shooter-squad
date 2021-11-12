@@ -23,12 +23,14 @@ device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 '''
 MODE:{'DEMO', 'PRETRAIN'}
 '''
-MODE = 'DEMO'
+MODE = 'PRETRAIN'
 SAVE_IMG = False
 BATCH_SIZE = 64
-N_EPOCH = 5
- 
+N_EPOCH =100
+
 GAME = 15
+if MODE == 'PRETRAIN':
+    GAME = None
  
 N_DEMO = 15
  
@@ -213,7 +215,8 @@ elif MODE == 'PRETRAIN':
     def get_num_correct(preds, labels):
         return preds.argmax(dim=1).eq(labels).sum().item()
 
-    
+    output_file = open("pretrain_from_demo.txt", "w")
+    output_file.close()
 
     total_len = image_tensor.shape[0] // BATCH_SIZE
 
@@ -235,5 +238,10 @@ elif MODE == 'PRETRAIN':
             total_loss += loss.item()
             total_correct += get_num_correct(preds, labels)
             # print('Total correct is: ', total_correct)
+        acuracy = total_correct / (total_len * BATCH_SIZE)
+        output_file = open("pretrain_from_demo.txt", "a")
+        output_file.write('epoch: {0}, accuracy: {1:.3f}, loss: {2:.3f}\n'.format(j, acuracy, total_loss))
+        output_file.close()
+        # print('Accuracies: ', ))
 
-        print('Accuracies: ', total_correct / (total_len * BATCH_SIZE))
+    T.save(network.state_dict(), 'model_pretrain_from_demo.pt')
