@@ -5,8 +5,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 
-import sys
-sys.path.insert(0, r'../')
 from Env.constants import *
 
 class DeepQNetwork(nn.Module):
@@ -15,7 +13,7 @@ class DeepQNetwork(nn.Module):
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
         self.pre_train_file = os.path.join(pre_train_dir, name)
-        
+
         self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
         self.conv3 = nn.Conv2d(64, 64, 3, stride=1)
@@ -49,7 +47,7 @@ class DeepQNetwork(nn.Module):
         # * flatten info_stack
         info_stack_flatten = info_stack.view(info_stack.size()[0], -1)
         flatten_cat = T.cat([conv_state, info_stack_flatten], dim=1)
-        
+
         # conv_state shape is BS x (n_filters * H * W)
         flat1 = F.relu(self.fc1(flatten_cat))
         actions = self.fc2(flat1) # // NOTE: actions: [32, 6]
