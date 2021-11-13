@@ -31,7 +31,7 @@ if __name__ == '__main__':
                      input_dims=(env.observation_space.shape),
                      n_actions=env.action_space.n, mem_size=30000, eps_min=eps_min,
                      batch_size=64, replace=1000, eps_dec=1e-5,
-                     chkpt_dir='models/', pre_train_dir='pre_train_models/', algo='DQNAgentScratch',
+                     chkpt_dir='models/', pre_train_dir='pre_train_models/', algo='DQNAgentPretrain',
                      env_name=env_name)
 
     if load_checkpoint:
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
-    output_file = open("stats_dqn_scratch.txt", "w")
+    output_file = open("stats_dqn_pretrain.txt", "w")
     output_file.close()
     accuracy_file = open('accuracy_image_neg', 'w')
     for i in range(n_games):
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         info_stack = env.get_info_stack()
         score = 0
         cur_step = 0
-        while not done or cur_step > STEP_LIMIT_PER_GAME:
+        while not done and cur_step < STEP_LIMIT_PER_GAME:
             # // NOTE: whenever the agent makes a move, he enters a new state. it store the observation, action, reward, obseravation_, done in his memory for REPLAY, which has size of 40000.
             
             action = agent.choose_action(observation, info_stack) # * action shape is scalar (e.g. 3)
