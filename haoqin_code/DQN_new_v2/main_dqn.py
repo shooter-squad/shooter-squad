@@ -12,7 +12,7 @@ import sys
 from Env import *
 from Env.utils import plot_learning_curve, make_env
 
-PRE_TRAIN = False
+PRE_TRAIN = True
 
 if __name__ == '__main__':
     env_name = 'shooter'
@@ -25,6 +25,9 @@ if __name__ == '__main__':
     if load_checkpoint:
         epsilon = 0.0
         eps_min = 0.001
+    if PRE_TRAIN:
+        epsilon = 0.5
+        eps_min = 0.1
     n_games = 3000
     print('env obervation space shape is ', env.observation_space.shape)
     agent = DQNAgent(gamma=0.99, epsilon=epsilon, lr=0.0001,

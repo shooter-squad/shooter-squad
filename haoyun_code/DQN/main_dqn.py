@@ -44,7 +44,7 @@ if __name__ == '__main__':
     scores, eps_history, steps_array = [], [], []
 
     time_prev = time.time()
-
+    output_file = open("stats.txt", "w")
     for i in range(n_games):
         done = False
         observation = env.reset()
@@ -56,6 +56,9 @@ if __name__ == '__main__':
             observation_, reward, done, info = env.step(action)
             # print(observation.shape)
             score += reward
+
+            if np.random.random()<0.5:
+                observation[np.random.randint(0,4)] = np.zeros((84,84))
 
             if not load_checkpoint: # NOTE: obseration: [32, 4, 84, 84]; actions: [32]; obseration_: [32, 4, 84, 84]; dones: [32]; rewards:[32]
                 agent.store_transition(observation, action,
@@ -69,9 +72,11 @@ if __name__ == '__main__':
         steps_array.append(n_steps)
 
         avg_score = np.mean(scores[-100:])
-        print('episode: ', i,'score: ', score,
-             ' average score %.1f' % avg_score, 'best score %.2f' % best_score,
-            'epsilon %.2f' % agent.epsilon, 'steps', n_steps, 'time', time.time()-time_prev)
+        output_file.write('episode: {0}, score: {1}, average score: {2:.1f}, best score: {3:.2f}, epsilon: {4:.2f}, steps: {5}\n'.format(i, score, avg_score, best_score,agent.epsilon, n_steps))
+
+        print('episode: ', i,', score: ', score,
+                ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
+                ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
         time_prev = time.time()
 
         if avg_score > best_score:
@@ -86,5 +91,6 @@ if __name__ == '__main__':
             figure_file = 'plots/' + fname +'_'+str(i)+'_.png'
             plot_learning_curve(steps_array, scores, eps_history, figure_file)
 
+    output_file.close()
     figure_file = 'plots/' + fname + '_final.png'
     plot_learning_curve(steps_array, scores, eps_history, figure_file)

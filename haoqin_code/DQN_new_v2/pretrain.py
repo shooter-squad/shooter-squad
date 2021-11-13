@@ -26,11 +26,13 @@ MODE:{'DEMO', 'PRETRAIN'}
 MODE = 'PRETRAIN'
 SAVE_IMG = False
 BATCH_SIZE = 64
-N_EPOCH = 5
+N_EPOCH =100
+
+GAME = 15
+if MODE == 'PRETRAIN':
+    GAME = None
  
-GAME = 0
- 
-N_DEMO = 1
+N_DEMO = 15
  
 PARTIAL_BATCH_SIZE = 8
  
@@ -55,6 +57,19 @@ if MODE == 'DEMO':
     action_list = []
  
     n_steps = 0
+
+    # Clear directory
+    state_file_name = game_name + '/image_demo'
+    info_file_name = game_name + '/info_demo'
+    action_file_name = game_name + '/action_demo'
+
+    def clear_directory(dir):
+        for f in os.listdir(dir):
+            os.remove(os.path.join(dir, f))
+
+    clear_directory(state_file_name)
+    clear_directory(info_file_name)
+    clear_directory(action_file_name)
  
     while not done:
         state, reward, done, info = env.step(-1)
@@ -62,7 +77,7 @@ if MODE == 'DEMO':
         state = np.expand_dims(state, axis=0)
         info = np.expand_dims(info, axis=0)
  
-        action = env.get_player_action()
+        action = env.player_action_num
        
         if image_tensor is None:
             image_tensor = state
@@ -81,7 +96,7 @@ if MODE == 'DEMO':
         # print('iter = ', iter)
         iter += 1
         if iter >= PARTIAL_BATCH_SIZE or done:
- 
+            print(env.game_scene.player.health)
             action_tensor = T.Tensor(action_list)
  
             state_file_name = game_name + '/image_demo/image_' + str(file_iter) + '.npy'
@@ -200,7 +215,8 @@ elif MODE == 'PRETRAIN':
     def get_num_correct(preds, labels):
         return preds.argmax(dim=1).eq(labels).sum().item()
 
-    
+    output_file = open("pretrain_from_demo.txt", "w")
+    output_file.close()
 
     total_len = image_tensor.shape[0] // BATCH_SIZE
 
@@ -222,5 +238,10 @@ elif MODE == 'PRETRAIN':
             total_loss += loss.item()
             total_correct += get_num_correct(preds, labels)
             # print('Total correct is: ', total_correct)
+        acuracy = total_correct / (total_len * BATCH_SIZE)
+        output_file = open("pretrain_from_demo.txt", "a")
+        output_file.write('epoch: {0}, accuracy: {1:.3f}, loss: {2:.3f}\n'.format(j, acuracy, total_loss))
+        output_file.close()
+        # print('Accuracies: ', ))
 
-        print('Accuracies: ', total_correct / (total_len * BATCH_SIZE))
+    T.save(network.state_dict(), 'model_pretrain_from_demo.pt')
