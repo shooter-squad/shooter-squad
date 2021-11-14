@@ -1,3 +1,6 @@
 [submodule "lihan_code/DQN_v2_pre_train/Env"]
 	path = lihan_code/DQN_v2_pre_train/Env
 	url = git@github.com:shooter-squad/Env.git
+[submodule "lihan_code.DQN_v2_pre_train.Env"]
+	branch = master
+	update = rebase
