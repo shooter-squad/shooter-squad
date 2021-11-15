@@ -25,12 +25,12 @@ device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 '''
 MODE:{'DEMO', 'PRETRAIN', 'SAVE'}
 '''
-MODE = 'PRETRAIN'
+MODE = 'DEMO'
 SAVE_IMG = False
 BATCH_SIZE = 64
 N_EPOCH =100
 
-GAME = 15
+GAME = 1
 if MODE == 'PRETRAIN':
     GAME = None
  
@@ -104,7 +104,7 @@ if MODE == 'DEMO':
         # print(info_tensor.shape)
         # print('iter = ', iter)
         iter += 1
-        if iter >= PARTIAL_BATCH_SIZE or done:
+        if iter > PARTIAL_BATCH_SIZE or done:
             print(env.game_scene.player.health)
             action_tensor = T.Tensor(action_list)
  
@@ -129,6 +129,8 @@ if MODE == 'DEMO':
  
             iter = 0
             file_iter += 1
+
+            break
  
         n_steps += 1
 
@@ -137,11 +139,14 @@ if MODE == 'DEMO':
 
         state_ = state
         info_stack_ = info_stack
+
+            
  
     print('n_steps: ', n_steps)
 
     # store memory into files
     memory.save_memory(memory_name)
+    memory.load_memory()
     
 
 elif MODE == 'PRETRAIN':

@@ -12,8 +12,20 @@ import sys
 from Env import *
 from Env.utils import plot_learning_curve, make_env
 
-PRE_TRAIN = True
+PRE_TRAIN = False
 DEMO_MEM = False
+LOG = False
+
+output_file_name = "stats_dqn_scratch.txt"
+accuracy_file_name = 'accuracy_image_neg'
+if not LOG:
+    output_file_name = 'OUTPUT DEBUGGING FILE'
+    accuracy_file_name = 'ACCURACY DEBUGGING FILE'
+
+output_file = open(output_file_name, "w")
+output_file.close()
+accuracy_file = open(accuracy_file_name, 'w')
+
 
 if __name__ == '__main__':
     env_name = 'shooter'
@@ -58,9 +70,7 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
-    output_file = open("stats_dqn_scratch.txt", "w")
-    output_file.close()
-    accuracy_file = open('accuracy_image_neg', 'w')
+    
 
 
 
@@ -75,7 +85,7 @@ if __name__ == '__main__':
             
             action = agent.choose_action(observation, info_stack) # * action shape is scalar (e.g. 3)
             print('observation shape ', observation.shape)
-            print(info_stack)
+            # print(info_stack)
             # print('action shape is: ', action)
             # print('in one iteration')
             
@@ -90,8 +100,8 @@ if __name__ == '__main__':
             
             observation_, reward, done, info = env.step(action) # * observation shape is (4, 84, 84), reward = scalar, all variables are unbatched, info-stack: (4, 6)
             info_stack_ = env.get_info_stack()
-            print('INFO_STACK')
-            print(info_stack)
+            # print('INFO_STACK')
+            # print(info_stack)
             print('action shape: ', action, 'obseravation shape', observation.shape)
             time_prev = time.time()
             score += reward
@@ -112,7 +122,7 @@ if __name__ == '__main__':
 
         avg_score = np.mean(scores[-100:])
 
-        output_file = open("stats_dqn_scratch.txt", "a")
+        output_file = open(output_file_name, "a")
         output_file.write('episode: {0}, score: {1}, average score: {2:.1f}, best score: {3:.2f}, epsilon: {4:.2f}, steps: {5}\n'.format(i, score, avg_score, best_score,agent.epsilon, n_steps))
         output_file.close()
 

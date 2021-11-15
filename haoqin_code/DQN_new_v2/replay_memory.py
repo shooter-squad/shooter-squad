@@ -35,16 +35,17 @@ class ReplayBuffer(object):
 
         # print('INFO_STACK SHAPE: ', info_stack_shape)
         # print('INFO_STACK SHAPE_: ', info_stack_shape_)
-
-
-        self.info_stack_memory[index][0:info_stack_shape[0], 0:info_stack_shape[1]] = info_stack
-        self.new_info_stack_memory[index][0:info_stack_shape_[0], 0:info_stack_shape_[1]] = info_stack_
-
+        # self.info_stack_memory[index][0:info_stack_shape[0], 0:info_stack_shape[1]] = info_stack
+        # self.new_info_stack_memory[index][0:info_stack_shape_[0], 0:info_stack_shape_[1]] = info_stack_
+        self.info_stack_memory[index] = info_stack
+        self.new_info_stack_memory[index] = info_stack_
 
         self.mem_cntr += 1
 
         # debug memory buffer
         print('###############DEBUG MEMORY BUFFER#################')
+        print('INFO_STACK SHAPE: ', info_stack_shape)
+        print('INFO_STACK SHAPE_: ', info_stack_shape_)
         print(self.state_memory.shape)
         print(self.new_state_memory.shape)
         print(self.action_memory.shape)
@@ -52,6 +53,8 @@ class ReplayBuffer(object):
         print(self.terminal_memory.shape)
         print(self.info_stack_memory.shape)
         print(self.new_info_stack_memory.shape)
+        print('###############DEBUG MEMORY BUFFER#################')
+
 
     def sample_buffer(self, batch_size):
         max_mem = min(self.mem_cntr, self.mem_size)
@@ -68,8 +71,16 @@ class ReplayBuffer(object):
         return states, actions, rewards, states_, terminal, info_stack, info_stack_
 
     def save_memory(self, memory_name):
-        for f in os.listdir(memory_name):
-            os.remove(os.path.join(dir, f))
+
+        path = os.getcwd()
+        new_dir = memory_name
+        filename = os.path.join(path, new_dir)
+        try: 
+            os.mkdir(filename) 
+        except OSError as error: 
+            print('Warning: Memory already exist and will be overridden')  
+            for f in os.listdir(memory_name):
+                os.remove(os.path.join(filename, f))
 
         state_dir = memory_name + '/states_memory.npy'
         action_dir = memory_name + '/action_memory.npy'
@@ -80,21 +91,21 @@ class ReplayBuffer(object):
         new_info_stack_dir = memory_name + '/new_info_stack_memory.npy'
 
         with open(state_dir, 'wb') as f:
-                np.save(f, self.state_memory)
+                np.save(f, self.state_memory[:self.mem_cntr])
         with open(action_dir, 'wb') as f:
-                np.save(f, self.action_memory)
+                np.save(f, self.action_memory[:self.mem_cntr])
         with open(reward_dir, 'wb') as f:
-                np.save(f, self.reward_memory)
+                np.save(f, self.reward_memory[:self.mem_cntr])
         with open(new_state_dir, 'wb') as f:
-                np.save(f, self.new_state_memory)
+                np.save(f, self.new_state_memory[:self.mem_cntr])
         with open(terminal_dir, 'wb') as f:
-                np.save(f, self.terminal_memory)
+                np.save(f, self.terminal_memory[:self.mem_cntr])
         with open(info_stack_dir, 'wb') as f:
-                np.save(f, self.info_stack_memory)
+                np.save(f, self.info_stack_memory[:self.mem_cntr])
         with open(new_info_stack_dir, 'wb') as f:
-                np.save(f, self.new_info_stack_memory)
+                np.save(f, self.new_info_stack_memory[:self.mem_cntr])
 
-    def load_memory(self, N_DEMO=15):
+    def load_memory(self, N_DEMO=2):
 
         state_tensor = None
         action_tensor = None
@@ -166,6 +177,7 @@ class ReplayBuffer(object):
                 else:
                     new_info_stack_tensor = np.concatenate((new_info_stack_tensor, new_info_stack), axis=0)
     
+        print('###############DEBUG LOAD MEMORY#################')
         print(state_tensor.shape)
         print(action_tensor.shape)
         print(reward_tensor.shape)
@@ -173,6 +185,7 @@ class ReplayBuffer(object):
         print(terminal_tensor.shape)
         print(info_stack_tensor.shape)
         print(new_info_stack_tensor.shape)
+        print('###############DEBUG LOAD MEMORY#################')
 
 
 

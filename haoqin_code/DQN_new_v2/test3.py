@@ -46,3 +46,6 @@ try:
     os.mkdir(filename) 
 except OSError as error: 
     print(error)  
+
+for f in os.listdir('Memory0'):
+    os.remove(os.path.join(path, f))
