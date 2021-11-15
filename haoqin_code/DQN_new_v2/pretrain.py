@@ -30,7 +30,7 @@ SAVE_IMG = False
 BATCH_SIZE = 64
 N_EPOCH =100
 
-GAME = 1
+GAME = 3
 if MODE == 'PRETRAIN':
     GAME = None
  
@@ -61,7 +61,7 @@ if MODE == 'DEMO':
  
     n_steps = 0
 
-    memory = ReplayBuffer(max_size=20000, input_shape=env.observation_space.shape, n_actions=env.action_space.n)
+    memory = ReplayBuffer(max_size=50, input_shape=env.observation_space.shape, n_actions=env.action_space.n)
 
     # Clear directory
     state_file_name = game_name + '/image_demo'
@@ -78,7 +78,7 @@ if MODE == 'DEMO':
 
     state_ = env.reset()
     info_stack_ = env.get_info_stack()
- 
+
     while not done:
         state, reward, done, info = env.step(-1)
         info = env.get_info_stack()
@@ -104,45 +104,48 @@ if MODE == 'DEMO':
         # print(info_tensor.shape)
         # print('iter = ', iter)
         iter += 1
-        if iter > PARTIAL_BATCH_SIZE or done:
-            print(env.game_scene.player.health)
-            action_tensor = T.Tensor(action_list)
- 
-            state_file_name = game_name + '/image_demo/image_' + str(file_iter) + '.npy'
-            info_file_name = game_name + '/info_demo/info_' + str(file_iter) + '.npy'
-            action_file_name = game_name + '/action_demo/info_' + str(file_iter) + '.npy'
-                # print(state_file_name)
-                # print(image_tensor.shape)
-                # print(info_file_name)
-                # print(info_tensor.shape)
-            with open(state_file_name, 'wb') as f1:
-                np.save(f1, image_tensor)
-            with open(info_file_name, 'wb') as f2:
-                np.save(f2, info_tensor)
-            with open(action_file_name, 'wb') as f2:
-                np.save(f2, action_tensor)
- 
-            image_tensor = None
-            info_tensor = None
-            action_list = []
-            action_tensor = None
- 
-            iter = 0
-            file_iter += 1
+        # if iter >= PARTIAL_BATCH_SIZE or done:
+        print(env.game_scene.player.health)
+        action_tensor = T.Tensor(action_list)
 
-            break
+        state_file_name = game_name + '/image_demo/image_' + str(file_iter) + '.npy'
+        info_file_name = game_name + '/info_demo/info_' + str(file_iter) + '.npy'
+        action_file_name = game_name + '/action_demo/info_' + str(file_iter) + '.npy'
+            # print(state_file_name)
+            # print(image_tensor.shape)
+            # print(info_file_name)
+            # print(info_tensor.shape)
+        with open(state_file_name, 'wb') as f1:
+            np.save(f1, image_tensor)
+        with open(info_file_name, 'wb') as f2:
+            np.save(f2, info_tensor)
+        with open(action_file_name, 'wb') as f2:
+            np.save(f2, action_tensor)
+
+        image_tensor = None
+        info_tensor = None
+        action_list = []
+        action_tensor = None
+
+        iter = 0
+        file_iter += 1
+
+            
  
         n_steps += 1
 
         # store memory buffer
         memory.store_transition(state_, action, reward, state, done, info_stack_, info_stack)
-
+        print('ITER NUM: ', file_iter)
         state_ = state
         info_stack_ = info_stack
-
-            
+        
+        if file_iter >= 4:
+            break
  
     print('n_steps: ', n_steps)
+    np.set_printoptions(threshold=sys.maxsize)
+    print(memory.new_info_stack_memory)
 
     # store memory into files
     memory.save_memory(memory_name)

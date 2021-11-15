@@ -42,17 +42,17 @@ class ReplayBuffer(object):
 
         self.mem_cntr += 1
 
-        # debug memory buffer
+        #debug memory buffer
         print('###############DEBUG MEMORY BUFFER#################')
         print('INFO_STACK SHAPE: ', info_stack_shape)
         print('INFO_STACK SHAPE_: ', info_stack_shape_)
-        print(self.state_memory.shape)
-        print(self.new_state_memory.shape)
-        print(self.action_memory.shape)
-        print(self.reward_memory.shape)
-        print(self.terminal_memory.shape)
-        print(self.info_stack_memory.shape)
-        print(self.new_info_stack_memory.shape)
+        print(self.state_memory[:self.mem_cntr].shape)
+        print(self.new_state_memory[:self.mem_cntr].shape)
+        print(self.action_memory[:self.mem_cntr].shape)
+        print(self.reward_memory[:self.mem_cntr].shape)
+        print(self.terminal_memory[:self.mem_cntr].shape)
+        print(self.info_stack_memory[:self.mem_cntr].shape)
+        print(self.new_info_stack_memory[:self.mem_cntr].shape)
         print('###############DEBUG MEMORY BUFFER#################')
 
 
@@ -105,7 +105,7 @@ class ReplayBuffer(object):
         with open(new_info_stack_dir, 'wb') as f:
                 np.save(f, self.new_info_stack_memory[:self.mem_cntr])
 
-    def load_memory(self, N_DEMO=2):
+    def load_memory(self, N_DEMO=4):
 
         state_tensor = None
         action_tensor = None
@@ -118,7 +118,7 @@ class ReplayBuffer(object):
         for i in range(N_DEMO):
             
             memory_name = 'Memory' + str(i)
-             
+            print('LOAD ' + memory_name)
 
             state_dir = memory_name + '/states_memory.npy'
             action_dir = memory_name + '/action_memory.npy'
@@ -177,18 +177,29 @@ class ReplayBuffer(object):
                 else:
                     new_info_stack_tensor = np.concatenate((new_info_stack_tensor, new_info_stack), axis=0)
     
-        print('###############DEBUG LOAD MEMORY#################')
-        print(state_tensor.shape)
-        print(action_tensor.shape)
-        print(reward_tensor.shape)
-        print(new_state_tensor.shape)
-        print(terminal_tensor.shape)
-        print(info_stack_tensor.shape)
-        print(new_info_stack_tensor.shape)
-        print('###############DEBUG LOAD MEMORY#################')
+            print('###############DEBUG LOAD MEMORY#################')
+            print(state_tensor.shape)
+            print(action_tensor.shape)
+            print(reward_tensor.shape)
+            print(new_state_tensor.shape)
+            print(terminal_tensor.shape)
+            print(info_stack_tensor.shape)
+            print(new_info_stack_tensor.shape)
+            print('###############DEBUG LOAD MEMORY#################')
 
-
-
+        index = state_tensor.shape[0]
+        self.state_memory[:index] = state_tensor
+        self.action_memory[:index] = action_tensor
+        self.reward_memory[:index] = reward_tensor
+        self.new_state_memory[:index] = new_state_tensor
+        self.terminal_memory[:index] = terminal_tensor
+        self.info_stack_memory[:index] = info_stack_tensor
+        self.new_info_stack_memory[:index] = new_info_stack_tensor
+        
+        self.mem_cntr = index
+        print('SELF.MEM_CNTR IS: ', self.mem_cntr)
+        np.set_printoptions(threshold=sys.maxsize)
+        print(self.new_info_stack_memory)
         # self.state_memory[index] = state
         # self.new_state_memory[index] = state_
         # self.action_memory[index] = action
