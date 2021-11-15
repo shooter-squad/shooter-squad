@@ -1,11 +1,6 @@
-import gym
-import numpy as np
-from dqn_agent import DQNAgent
-from gym import wrappers
 import time
-import sys
-# adding Folder_2 to the system path
-# sys.path.insert(0, r'/home/zhuli/projects/shooter-squad/lihan_code')
+
+from dqn_agent import DQNAgent
 from Env import *
 
 
