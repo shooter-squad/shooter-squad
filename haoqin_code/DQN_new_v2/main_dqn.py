@@ -13,6 +13,7 @@ from Env import *
 from Env.utils import plot_learning_curve, make_env
 
 PRE_TRAIN = True
+DEMO_MEM = False
 
 if __name__ == '__main__':
     env_name = 'shooter'
@@ -42,7 +43,8 @@ if __name__ == '__main__':
 
     if PRE_TRAIN:
         agent.PreTrain()
-
+    if DEMO_MEM:
+        agent.memory.load_memory()
     fname = agent.algo + '_' + agent.env_name + '_lr' + str(agent.lr) +'_' \
             + str(n_games) + 'games'
     figure_file = 'plots/' + fname + '.png'
@@ -59,6 +61,9 @@ if __name__ == '__main__':
     output_file = open("stats_dqn_scratch.txt", "w")
     output_file.close()
     accuracy_file = open('accuracy_image_neg', 'w')
+
+
+
     for i in range(n_games):
         done = False
         observation = env.reset()

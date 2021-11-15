@@ -17,11 +17,13 @@ from Env.utils import make_env
 from torchvision.utils import save_image
 import torch
 import torchvision
+
+from replay_memory import ReplayBuffer
  
 device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 
 '''
-MODE:{'DEMO', 'PRETRAIN'}
+MODE:{'DEMO', 'PRETRAIN', 'SAVE'}
 '''
 MODE = 'PRETRAIN'
 SAVE_IMG = False
@@ -39,6 +41,7 @@ PARTIAL_BATCH_SIZE = 8
 
  
 game_name = 'Demo' + str(GAME)
+memory_name = 'Memory' + str(GAME)
  
 env_name = 'shooter'
 env = make_env(env_name)
@@ -58,6 +61,8 @@ if MODE == 'DEMO':
  
     n_steps = 0
 
+    memory = ReplayBuffer(max_size=20000, input_shape=env.observation_space.shape, n_actions=env.action_space.n)
+
     # Clear directory
     state_file_name = game_name + '/image_demo'
     info_file_name = game_name + '/info_demo'
@@ -70,10 +75,14 @@ if MODE == 'DEMO':
     clear_directory(state_file_name)
     clear_directory(info_file_name)
     clear_directory(action_file_name)
+
+    state_ = env.reset()
+    info_stack_ = env.get_info_stack()
  
     while not done:
         state, reward, done, info = env.step(-1)
         info = env.get_info_stack()
+        info_stack = env.get_info_stack()
         state = np.expand_dims(state, axis=0)
         info = np.expand_dims(info, axis=0)
  
@@ -122,9 +131,19 @@ if MODE == 'DEMO':
             file_iter += 1
  
         n_steps += 1
+
+        # store memory buffer
+        memory.store_transition(state_, action, reward, state, done, info_stack_, info_stack)
+
+        state_ = state
+        info_stack_ = info_stack
  
     print('n_steps: ', n_steps)
- 
+
+    # store memory into files
+    memory.save_memory(memory_name)
+    
+
 elif MODE == 'PRETRAIN':
     image_tensor = None
     info_tensor = None

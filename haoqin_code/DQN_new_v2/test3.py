@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import os
 
 A = torch.ones(2, 2)
 B = torch.zeros(2, 3)
@@ -37,3 +38,11 @@ B = np.zeros(shape=(2, 2))
 # C = np.concatenate([A, B], axis=0)
 print(C)
 print(C.shape)
+
+path = os.getcwd()
+new_dir = 'test3_dir'
+filename = os.path.join(path, new_dir)
+try: 
+    os.mkdir(filename) 
+except OSError as error: 
+    print(error)  
