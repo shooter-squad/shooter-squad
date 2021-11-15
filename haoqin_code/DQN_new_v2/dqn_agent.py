@@ -1,6 +1,6 @@
 import numpy as np
 import torch as T
-from deep_q_network import DeepQNetwork
+from deep_q_network import DeepQNetwork, DeepQNetwork2
 from replay_memory import ReplayBuffer
 
 class DQNAgent(object):
@@ -24,12 +24,12 @@ class DQNAgent(object):
 
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions)
 
-        self.q_eval = DeepQNetwork(self.lr, self.n_actions,
+        self.q_eval = DeepQNetwork2(self.lr, self.n_actions,
                                     input_dims=self.input_dims,
                                     name=self.env_name+'_'+self.algo+'_q_eval',
                                     chkpt_dir=self.chkpt_dir)
 
-        self.q_next = DeepQNetwork(self.lr, self.n_actions,
+        self.q_next = DeepQNetwork2(self.lr, self.n_actions,
                                     input_dims=self.input_dims,
                                     name=self.env_name+'_'+self.algo+'_q_next',
                                     chkpt_dir=self.chkpt_dir)
