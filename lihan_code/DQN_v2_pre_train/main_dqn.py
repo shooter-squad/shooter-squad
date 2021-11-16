@@ -50,9 +50,8 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
-    output_file = open("stats_dqn_pretrain.txt", "w")
+    output_file = open("stats_dqn_pretrain_no_shield.txt", "w")
     output_file.close()
-    accuracy_file = open('accuracy_image_neg', 'w')
     for i in range(n_games):
         done = False
         observation = env.reset()
@@ -106,9 +105,6 @@ if __name__ == '__main__':
         print('episode: ', i, ', score: ', score,
               ', average score: %.1f' % avg_score, ', best score: %.2f' % best_score,
               ', epsilon: %.2f' % agent.epsilon, ', steps: ', n_steps)
-        accuracy_file.write('episode: ' + str(i) + ' score: ' + str(score) +
-                            ' average score: ' + str(avg_score) + ' best score: ' + str(best_score) +
-                            ' epsilon: ' + str(agent.epsilon) + ' steps: ' + str(n_steps) + '\n')
         if avg_score > best_score:
             # if not load_checkpoint:
             #     agent.save_models()
@@ -118,6 +114,5 @@ if __name__ == '__main__':
 
         if i % 50 == 49:
             agent.save_models()
-    accuracy_file.close()
     x = [i + 1 for i in range(len(scores))]
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
