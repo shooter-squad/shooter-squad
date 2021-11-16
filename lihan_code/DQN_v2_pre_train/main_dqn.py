@@ -16,7 +16,7 @@ if __name__ == '__main__':
         epsilon = 0.0
         eps_min = 0.001
     elif pre_train:
-        epsilon = 0.5
+        epsilon = 0.8
         eps_min = 0.1
     else:
         epsilon = 1.0
@@ -50,7 +50,8 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
-    output_file = open("stats_dqn_pretrain_no_shield.txt", "w")
+    output_file_name = "stats_dqn_pretrain_no_shield.txt"
+    output_file = open(output_file_name, "w")
     output_file.close()
     for i in range(n_games):
         done = False
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 
         avg_score = np.mean(scores[-100:])
 
-        output_file = open("stats_dqn_scratch.txt", "a")
+        output_file = open(output_file_name, "a")
         output_file.write(
             'episode: {0}, score: {1}, average score: {2:.1f}, best score: {3:.2f}, epsilon: {4:.2f}, steps: {5}\n'.format(
                 i, score, avg_score, best_score, agent.epsilon, n_steps))
