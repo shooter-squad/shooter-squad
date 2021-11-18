@@ -14,13 +14,13 @@ if __name__ == '__main__':
 
     if load_checkpoint:
         epsilon = 0.0
-        eps_min = 0.001
+        eps_min = 0.1
     elif pre_train:
-        epsilon = 0.01
+        epsilon = 1.0
         eps_min = 0.1
     else:
         epsilon = 1.0
-        eps_min = 0.001
+        eps_min = 0.1
     # -------------------- Parameters end --------------------
 
     env = make_env(env_name)
