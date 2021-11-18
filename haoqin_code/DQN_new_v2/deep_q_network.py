@@ -6,7 +6,7 @@ import torch.optim as optim
 import numpy as np
 
 import sys
-sys.path.insert(0, r'../')
+# sys.path.insert(0, r'../')
 from Env.constants import *
 
 class DeepQNetwork(nn.Module):
@@ -155,3 +155,15 @@ class DeepQNetwork2(nn.Module):
     def PreTrain(self):
         print('... loading pre_train model ...')
         self.load_state_dict(T.load(self.checkpoint_file))
+
+if __name__ == "__main__":
+    model = DeepQNetwork2(lr=0.1, n_actions=4, name='test', input_dims=(4, 84, 84), chkpt_dir='test_checkpoint')
+
+    import torch
+    from torchviz import make_dot
+
+    x = torch.randn(1, 4, 84, 84).cuda()
+    info_stack = torch.randn(1, 4, ADDITIONAL_STATE_LEN_PLAYER+ADDITIONAL_STATE_LEN_NORMAL+ADDITIONAL_STATE_LEN_CHARGE).cuda()
+    y = model(x, info_stack)
+
+    make_dot(y.mean(), params=dict(model.named_parameters())).render("dqn_network_graph_cat_v2.0", format="png")

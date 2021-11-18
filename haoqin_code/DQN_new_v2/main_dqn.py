@@ -2,7 +2,7 @@ import gym
 import numpy as np
 from dqn_agent import DQNAgent
 import sys
-sys.path.insert(0, r'../')
+# sys.path.insert(0, r'../')
 
 from gym import wrappers
 import time
@@ -14,9 +14,9 @@ from Env.utils import plot_learning_curve, make_env
 
 PRE_TRAIN = False
 DEMO_MEM = False
-LOG = False
+LOG = True
 
-output_file_name = "stats_dqn_scratch.txt"
+output_file_name = "stats_dqn2_scratch.txt"
 accuracy_file_name = 'accuracy_image_neg'
 if not LOG:
     output_file_name = 'OUTPUT DEBUGGING FILE'

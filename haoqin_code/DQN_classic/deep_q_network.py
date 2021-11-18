@@ -64,3 +64,15 @@ class DeepQNetwork(nn.Module):
     def load_checkpoint(self):
         print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
+
+if __name__ == "__main__":
+    model = DeepQNetwork(lr=0.1, n_actions=4, name='test', input_dims=(4, 84, 84), chkpt_dir='test_checkpoint')
+
+    import torch
+    from torchviz import make_dot
+
+    x = torch.randn(1, 4, 84, 84).cuda()
+    y = model(x)
+
+    make_dot(y.mean(), params=dict(model.named_parameters())).render("dqn_network_graph", format="png")
+

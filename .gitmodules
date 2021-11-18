@@ -13,3 +13,8 @@
 	url = git@github.com:shooter-squad/Env.git
 	branch = classic
 	update = rebase
+[submodule "lihan_code/DQN_v1.5_pre_train/Env"]
+	path = lihan_code/DQN_v1.5_pre_train/Env
+	url = git@github.com:shooter-squad/Env.git
+	branch = no-shield-and-ultimate-ability
+	update = rebase
