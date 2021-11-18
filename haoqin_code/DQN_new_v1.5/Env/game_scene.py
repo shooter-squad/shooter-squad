@@ -11,7 +11,7 @@ from Env.obstacle import Obstacle
 from Env.spaceship import Spaceship, SpaceshipType
 from Env.ultimate_ability import UltimateAbility
 
-# os.environ["SDL_VIDEODRIVER"] = "dummy"
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 
 def calculate_distance(first: pygame.sprite.Sprite, second: pygame.sprite.Sprite) -> float:
