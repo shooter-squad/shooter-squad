@@ -6,18 +6,17 @@ import torch.optim as optim
 import numpy as np
 
 class DeepQNetwork(nn.Module):
-    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir):
+    def __init__(self, lr, n_actions, name, input_dims, chkpt_dir, pre_train_dir):
         super(DeepQNetwork, self).__init__()
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-        # print(self.checkpoint_file)
+        self.pre_train_file = os.path.join(pre_train_dir, name)
         
         self.conv1 = nn.Conv2d(input_dims[0], 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
         self.conv3 = nn.Conv2d(64, 64, 3, stride=1)
 
         fc_input_dims = self.calculate_conv_output_dims(input_dims)
-        # print(fc_input_dims)
 
         self.fc1 = nn.Linear(fc_input_dims, 512)
         self.fc2 = nn.Linear(512, n_actions)
@@ -39,21 +38,14 @@ class DeepQNetwork(nn.Module):
     def forward(self, state):
         # * N=batch_size=64, C_in=input_channel=4, H=84, W=84
         # print('ENTERING FORWARD')
-        # print('state.shape: ', state.shape)
         conv1 = F.relu(self.conv1(state))
-        # print('conv1.shape: ', conv1.shape)
         conv2 = F.relu(self.conv2(conv1))
-        # print('conv2.shape: ', conv2.shape)
         conv3 = F.relu(self.conv3(conv2))
-        # print('conv3.shape: ', conv3.shape)
         # conv3 shape is BS x n_filters x H x W
         conv_state = conv3.view(conv3.size()[0], -1)
-        # print('conv_state.shape: ', conv_state.shape)
         # conv_state shape is BS x (n_filters * H * W)
         flat1 = F.relu(self.fc1(conv_state))
-        # print('flat1.shape: ', flat1.shape)
         actions = self.fc2(flat1) # // NOTE: actions: [32, 6]
-        # print('actions.shape: ', actions.shape)
 
         return actions
 
@@ -65,14 +57,31 @@ class DeepQNetwork(nn.Module):
         print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
 
-if __name__ == "__main__":
-    model = DeepQNetwork(lr=0.1, n_actions=4, name='test', input_dims=(4, 84, 84), chkpt_dir='test_checkpoint')
+    def pre_train(self):
+        print('... loading pre_train model from ' + str(self.pre_train_file) + ' ...')
+        self.load_state_dict(T.load(self.pre_train_file))
+        return
 
-    import torch
-    from torchviz import make_dot
+        pre_train_state = T.load(self.pre_train_file, map_location='cuda')
+        cur_state_dict = self.state_dict()  # The current model's state_dict
 
-    x = torch.randn(1, 4, 84, 84).cuda()
-    y = model(x)
+        for key in pre_train_state.keys():
+            if key in cur_state_dict:
+                if pre_train_state[key].shape == cur_state_dict[key].shape:
+                    cur_state_dict[key] = nn.Parameter(pre_train_state[key].data)
+                    print('Success: Loaded {} from pre-train model'.format(key))
+                else:
+                    print('Warn: Size mismatch for {}, size of loaded model {}, size of current model {}'.format(
+                        key, pre_train_state[key].shape, cur_state_dict[key].shape))
+                    temp = cur_state_dict[key].cpu().numpy()
+                    pre_arr = pre_train_state[key].cpu().numpy()
+                    if len(temp.shape) == 2:
+                        temp[0:pre_arr.shape[0], 0:pre_arr.shape[1]] = pre_arr
+                    elif len(temp.shape) == 1:
+                        temp[0:pre_arr.shape[0]] = pre_arr
+                    cur_state_dict[key] = nn.Parameter(T.from_numpy(temp))
 
-    make_dot(y.mean(), params=dict(model.named_parameters())).render("dqn_network_graph", format="png")
+            else:
+                print('Error: Loaded weight {} not present in current model'.format(key))
 
+        self.load_state_dict(cur_state_dict)

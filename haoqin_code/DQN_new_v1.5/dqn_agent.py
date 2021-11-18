@@ -6,7 +6,7 @@ from replay_memory import ReplayBuffer
 class DQNAgent(object):
     def __init__(self, gamma, epsilon, lr, n_actions, input_dims,
                  mem_size, batch_size, eps_min=0.01, eps_dec=5e-7,
-                 replace=1000, algo=None, env_name=None, chkpt_dir='tmp/dqn'):
+                 replace=1000, algo=None, env_name=None, chkpt_dir='tmp/dqn', pre_train_dir='pre_train'):
         self.gamma = gamma
         self.epsilon = epsilon
         self.lr = lr
@@ -27,19 +27,16 @@ class DQNAgent(object):
         self.q_eval = DeepQNetwork(self.lr, self.n_actions,
                                     input_dims=self.input_dims,
                                     name=self.env_name+'_'+self.algo+'_q_eval',
-                                    chkpt_dir=self.chkpt_dir)
+                                    chkpt_dir=self.chkpt_dir, pre_train_dir=pre_train_dir)
 
         self.q_next = DeepQNetwork(self.lr, self.n_actions,
                                     input_dims=self.input_dims,
                                     name=self.env_name+'_'+self.algo+'_q_next',
-                                    chkpt_dir=self.chkpt_dir)
+                                    chkpt_dir=self.chkpt_dir, pre_train_dir=pre_train_dir)
 
     def choose_action(self, observation): # intially very exploratory, later becomes greedy
-        # print('Agent choose action')
         if np.random.random() > self.epsilon:
             state = T.tensor([observation],dtype=T.float).to(self.q_eval.device) # NOTE: state: [1, 84, 84]
-            # print('q_eval forward in choose action')
-            # print('state shape is: ', state.shape)
             actions = self.q_eval.forward(state)
             action = T.argmax(actions).item()
         else:
@@ -79,7 +76,6 @@ class DQNAgent(object):
         self.q_next.load_checkpoint()
 
     def learn(self):
-        # print('Agent learn')
         if self.memory.mem_cntr < self.batch_size:
             return
 
@@ -88,13 +84,10 @@ class DQNAgent(object):
         self.replace_target_network()
 
         states, actions, rewards, states_, dones = self.sample_memory() # *: state: [32, 4, 84, 84]; actions: [32]; dones: [32]; rewards:[32]
-        # print('In agent.learn(): ', states.shape, actions.shape)
         indices = np.arange(self.batch_size)
 
         # temporal difference learning
-        # print('q_eval forward in learn')
         q_pred = self.q_eval.forward(states)[indices, actions]
-        # print('q_next forward in learn')
         q_next = self.q_next.forward(states_).max(dim=1)[0]
 
         q_next[dones] = 0.0
@@ -106,3 +99,8 @@ class DQNAgent(object):
         self.learn_step_counter += 1
 
         self.decrement_epsilon()
+
+
+    def pre_train(self):
+        self.q_eval.pre_train()
+        self.q_next.pre_train()

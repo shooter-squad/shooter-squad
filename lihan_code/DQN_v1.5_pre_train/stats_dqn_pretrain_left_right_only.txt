@@ -1,0 +1,2 @@
+episode: 0, score: 60.0, average score: 60.0, best score: -inf, epsilon: 0.10, steps: 1112
+episode: 1, score: 30.0, average score: 45.0, best score: 60.00, epsilon: 0.10, steps: 2389

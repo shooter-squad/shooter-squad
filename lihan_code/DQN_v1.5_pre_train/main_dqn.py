@@ -16,7 +16,7 @@ if __name__ == '__main__':
         epsilon = 0.0
         eps_min = 0.001
     elif pre_train:
-        epsilon = 0.8
+        epsilon = 0.01
         eps_min = 0.1
     else:
         epsilon = 1.0
