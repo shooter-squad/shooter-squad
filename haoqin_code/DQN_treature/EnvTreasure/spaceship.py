@@ -3,9 +3,9 @@ from enum import Enum
 
 import pygame
 
-from bullet import Bullet
-from ultimate_ability import UltimateAbility
-from constants import *
+from .bullet import Bullet
+from .ultimate_ability import UltimateAbility
+from .constants import *
 
 
 class SpaceshipType(Enum):

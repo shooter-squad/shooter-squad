@@ -1,6 +1,17 @@
 import time
 
-from EnvTreasure import *
+from EnvTreasure.constants import *
+from EnvTreasure.bullet import *
+from EnvTreasure.spaceship import *
+from EnvTreasure.game_scene import *
+from EnvTreasure.shooter_env import *
+from EnvTreasure.obstacle import *
+from EnvTreasure.health_pack import *
+from EnvTreasure.ultimate_ability import *
+from EnvTreasure.utils import *
+
+# from EnvTreasure.
+
 from dqn_agent import DQNAgent
 
 if __name__ == '__main__':
