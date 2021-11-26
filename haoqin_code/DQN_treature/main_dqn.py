@@ -1,6 +1,6 @@
 import time
 
-from Env import *
+from EnvTreasure import *
 from dqn_agent import DQNAgent
 
 if __name__ == '__main__':
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     load_checkpoint = False
     n_games = 3000
     pre_train = False
-    step_limit_per_game = 2500
+    step_limit_per_game = 5000
 
     if load_checkpoint:
         epsilon = 0.0
@@ -29,7 +29,7 @@ if __name__ == '__main__':
                      input_dims=(env.observation_space.shape),
                      n_actions=env.action_space.n, mem_size=30000, eps_min=eps_min,
                      batch_size=64, replace=1000, eps_dec=1e-5,
-                     chkpt_dir='models/', pre_train_dir='pre_train_models/', algo='DQNAgentPretrain',
+                     chkpt_dir='models/', pre_train_dir='pre_train_models/', algo='DQNAgentTreasureHunter',
                      env_name=env_name)
 
     if load_checkpoint:
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     time_prev = 0
     time_curr = 0
 
-    output_file_name = "stats_dqn_pretrain_left_right_only.txt"
+    output_file_name = "stats_dqn_treasure_hunter.txt"
     output_file = open(output_file_name, "w")
     output_file.close()
     for i in range(n_games):
