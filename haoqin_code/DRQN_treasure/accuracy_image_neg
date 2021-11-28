@@ -1,0 +1,8 @@
+episode: 0, score: 30.0, average score: 30.0, best score: -inf, epsilon: 0.99, steps: 792
+episode: 0 score: 30.0 average score: 30.0 best score: -inf epsilon: 0.9927100000000332 steps: 792
+episode: 1, score: -30.0, average score: 0.0, best score: 30.00, epsilon: 0.99, steps: 1324
+episode: 1 score: -30.0 average score: 0.0 best score: 30.0 epsilon: 0.9873900000000574 steps: 1324
+episode: 2, score: -90.0, average score: -30.0, best score: 30.00, epsilon: 0.98, steps: 1727
+episode: 2 score: -90.0 average score: -30.0 best score: 30.0 epsilon: 0.9833600000000757 steps: 1727
+episode: 3, score: -40.0, average score: -32.5, best score: 30.00, epsilon: 0.98, steps: 2284
+episode: 3 score: -40.0 average score: -32.5 best score: 30.0 epsilon: 0.9777900000001011 steps: 2284

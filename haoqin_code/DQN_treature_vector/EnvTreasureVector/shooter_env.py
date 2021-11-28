@@ -28,7 +28,7 @@ class ShooterEnv(Env):
         #                              dtype=np.uint8)
         if state_mode == StateMode.VECTOR_MODE_2:
             # print('entering obs vector')
-            self.observation_shape = 30
+            self.observation_shape = 32
             self.observation_space = Box(low=np.zeros(self.observation_shape),
                                         high=np.full(self.observation_shape, 1),
                                         dtype=np.uint8)

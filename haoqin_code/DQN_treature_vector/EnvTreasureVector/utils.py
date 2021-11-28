@@ -143,7 +143,7 @@ def make_env(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False, no_ops=0
         env = ShooterEnv()
     else:
         env = gym.make(env_name)
-    env = RepeatActionAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
+    # env = RepeatActionAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
     # env = PreprocessFrame(shape, env)
     env = StackFrames(env, repeat)
     # print('stack: ', env.observation_space.shape)

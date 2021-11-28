@@ -206,7 +206,7 @@ class GameScene(object):
 
         # * generate enemy bullet vector
         # enemy_bullet_vector = [-1 for _ in range(STATE_VECTOR_MAX_BULLET_PER_SPACESHIP * NORMAL_ENEMY_COUNT * 2)]
-        enemy_bullet_vector = [-1 for _ in range(5 * 2)]
+        enemy_bullet_vector = [-1 for _ in range(6 * 2)]
         i = 0
         for bullet in self.enemy_bullet_group.sprites():
             bullet_pos_x_norm = bullet.rect.centerx / WIDTH
@@ -232,6 +232,7 @@ class GameScene(object):
         # print(health_pack_vector)
 
         state_arr = np.array(space_vector + player_bullet_vector + enemy_bullet_vector + health_pack_vector)
+        # print(state_arr.shape)
         return state_arr
 
 

@@ -12,8 +12,7 @@ from .spaceship import Spaceship, SpaceshipType
 from .ultimate_ability import UltimateAbility
 
 
-# os.environ["SDL_VIDEODRIVER"] = "dummy"
-
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 def calculate_distance(first: pygame.sprite.Sprite, second: pygame.sprite.Sprite) -> float:
     """
@@ -54,6 +53,7 @@ class GameScene(object):
         pygame.display.set_caption(TITLE)
 
         self.player_border_rect = pygame.Rect(100, OBSTACLE_Y_MAX, WIDTH - 200, HEIGHT - OBSTACLE_Y_MAX)
+        self.health_border_rect = pygame.Rect(200, OBSTACLE_Y_MAX, WIDTH - 400, HEIGHT - OBSTACLE_Y_MAX)
 
         self.health_font = pygame.font.SysFont(HEALTH_FONT[0], HEALTH_FONT[1])
         self.winner_font = pygame.font.SysFont(WINNER_FONT[0], WINNER_FONT[1])
@@ -194,7 +194,7 @@ class GameScene(object):
 
         # * generate player bullet vector
         # player_bullet_vector = [-1 for _ in range(STATE_VECTOR_MAX_BULLET_PER_SPACESHIP * 2)]
-        player_bullet_vector = [-1 for _ in range(4 * 2)]
+        player_bullet_vector = [-1 for _ in range(5 * 2)]
         i = 0
         for bullet in self.player_bullet_group.sprites():
             bullet_pos_x_norm = bullet.rect.centerx / WIDTH
@@ -231,6 +231,10 @@ class GameScene(object):
         # print(health_pack_vector)
 
         state_arr = np.array(space_vector + player_bullet_vector + enemy_bullet_vector + health_pack_vector)
+        if state_arr.size != 36:
+            print('error: state size is mismatched')
+            print(state_arr.shape)
+        # print(state_arr.size)
         return state_arr
 
 
@@ -436,26 +440,26 @@ class GameScene(object):
         pos_x = None
         pos_y = None
         
-        for j in range(10):
+        for j in range(30):
             separate = True
-            pos_x=random.randrange(self.player_border_rect.left, self.player_border_rect.right - HEALTH_PACK_WIDTH,
+            pos_x=random.randrange(self.health_border_rect.left, self.health_border_rect.right - HEALTH_PACK_WIDTH,
                                HEALTH_PACK_WIDTH // 3)
-            if (abs(pos_x - self.player.rect.x) < 200):
+            if (abs(pos_x - self.player.rect.x) < 40):
                 separate = False
             for health_pack in self.health_pack_group.sprites():
-                if (abs(pos_x - health_pack.rect.x) < 60):
+                if (abs(pos_x - health_pack.rect.x) < 40):
                     separate = False
             if separate:
                 break
 
-        for j in range(10):
+        for j in range(30):
             separate = True
-            pos_y=random.randrange(self.player_border_rect.top, self.player_border_rect.bottom - HEALTH_PACK_HEIGHT,
+            pos_y=random.randrange(self.health_border_rect.top, self.health_border_rect.bottom - HEALTH_PACK_HEIGHT,
                                 HEALTH_PACK_HEIGHT // 3)
-            # if (abs(pos_y - self.player.rect.y) < 60):
-            #     separate = False
+            if (abs(pos_y - self.player.rect.y) < 40):
+                separate = False
             for health_pack in self.health_pack_group.sprites():
-                if (abs(pos_y - health_pack.rect.y) < 60):
+                if (abs(pos_y - health_pack.rect.y) < 40):
                     separate = False
             if separate:
                 break
@@ -697,7 +701,8 @@ if __name__ == "__main__":
         game.Play(-1)
         # print(game.AdditionalState())
         sv = game.StateVector()
-        if len(game.AdditionalState().shape) < 1:
-            print("Warn: " + str(game.AdditionalState().shape))
+        # print(sv)
+        # if len(game.AdditionalState().shape) < 1:
+        #     print("Warn: " + str(game.AdditionalState().shape))
 
     game.Exit()

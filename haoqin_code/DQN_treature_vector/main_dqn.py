@@ -75,7 +75,7 @@ if __name__ == '__main__':
             # // NOTE: whenever the agent makes a move, he enters a new state. it store the observation, action, reward, obseravation_, done in his memory for REPLAY, which has size of 40000.
             action = agent.choose_action(observation) # * action shape is scalar (e.g. 3)
             observation_, reward, done, info = env.step(action) # * observation shape is (4, 84, 84), reward = scalar, all variables are unbatched
-            
+            # print(observation_)
             time_prev = time.time()
             score += reward
 
