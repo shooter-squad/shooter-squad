@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import cv2
+import torch
 
 from deep_q_network import DeepQNetwork
 from grad_cam import GradCam
@@ -12,6 +13,8 @@ env_name = 'shooter'
 env = make_env(env_name)
 
 image_file_name = 'test'
+
+torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 def load_model():
     model = DeepQNetwork(0.001, env.action_space.n,
@@ -38,12 +41,17 @@ def save_class_activation_on_image(org_img, activation_map, file_name):
     path_to_file = os.path.join('./results', file_name + '_Cam_Grayscale.jpg')
     cv2.imwrite(path_to_file, activation_map)
     # Heatmap of activation map
+    print(activation_map.shape)
+    print((activation_map))
+    print(org_img.shape)
+    print((org_img))
     activation_heatmap = cv2.applyColorMap(activation_map, cv2.COLORMAP_HSV)
     path_to_file = os.path.join('./results', file_name + '_Cam_Heatmap.jpg')
     cv2.imwrite(path_to_file, activation_heatmap)
     # Heatmap on picture
     # org_img = cv2.resize(org_img, (224, 224))
-    img_with_heatmap = np.float32(activation_heatmap) + np.float32(org_img)
+    colored_img = cv2.applyColorMap(org_img.astype(np.uint8), cv2.COLORMAP_PINK)
+    img_with_heatmap = np.float32(activation_heatmap) + np.float32(colored_img)
     img_with_heatmap = img_with_heatmap / np.max(img_with_heatmap)
     path_to_file = os.path.join('./results', file_name + '_Cam_On_Image.jpg')
     cv2.imwrite(path_to_file, np.uint8(255 * img_with_heatmap))

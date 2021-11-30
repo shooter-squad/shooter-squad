@@ -55,7 +55,8 @@ class DeepQNetwork(nn.Module):
 
     def load_checkpoint(self):
         print('... loading checkpoint ...')
-        self.load_state_dict(T.load(self.checkpoint_file, map_location=lambda storage, loc: storage))
+        self.load_state_dict(T.load(self.checkpoint_file))
+        # self.load_state_dict(T.load(self.checkpoint_file, map_location=lambda storage, loc: storage))
 
     def pre_train(self):
         print('... loading pre_train model from ' + str(self.pre_train_file) + ' ...')
